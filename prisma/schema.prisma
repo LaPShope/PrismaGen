@@ -1,0 +1,144 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator dbml {
+  provider = "prisma-dbml-generator"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id       Bytes     @id @default(dbgenerated("uuid_generate_v4()"))
+  email    String    @unique
+  name     String?
+  password String
+  role     Role      @default(Customer)
+  Customer Customer?
+  Admin    Admin?
+  Comment  Comment[]
+  Chat     Chat[]
+}
+
+enum Role {
+  Customer
+  Admin
+}
+
+model Customer {
+  account_id Bytes @id
+
+  Payment Payment[]
+  Account Account   @relation(fields: [account_id], references: [id])
+}
+
+model Admin {
+  account_id Bytes   @id
+  Account    Account @relation(fields: [account_id], references: [id])
+}
+
+model Laptop {
+  id             Bytes            @id @default(dbgenerated("uuid_generate_v4()"))
+  name           String
+  brand          String
+  description    String
+  Laptop_Details Laptop_Details[]
+  Comment        Comment[]
+}
+
+model Laptop_Details {
+  id        Bytes  @id @default(dbgenerated("uuid_generate_v4()"))
+  mac_id    String @unique
+  laptop_id Bytes
+  price     Int
+  color     Color
+
+  Laptop             Laptop                @relation(fields: [laptop_id], references: [id])
+  LaptopDetail_Image LaptopDetails_Image[]
+}
+
+model Payment {
+  id          Bytes   @id @default(dbgenerated("uuid_generate_v4()"))
+  customer_id Bytes
+  laptop_id   String
+  amount      Int
+  price       Decimal @db.Decimal(10, 2)
+
+  Customer Customer @relation(fields: [customer_id], references: [account_id])
+}
+
+model PaymentMethod {
+  id   Bytes       @id @default(dbgenerated("uuid_generate_v4()"))
+  data Json //   store essential data(given from third-party-payment) for each payment method
+  type PaymentType
+}
+
+model LaptopDetails_Image {
+  id               String @id @default(dbgenerated("uuid_generate_v4()"))
+  laptop_detail_id Bytes?
+  image_id         Bytes?
+
+  Image          Image?          @relation(fields: [image_id], references: [id])
+  Laptop_Details Laptop_Details? @relation(fields: [laptop_detail_id], references: [id])
+}
+
+model Image {
+  id        Bytes  @id @default(dbgenerated("uuid_generate_v4()"))
+  image_url String
+
+  LaptopDetail_Image LaptopDetails_Image[]
+}
+
+model Comment {
+  id         Bytes  @id @default(dbgenerated("uuid_generate_v4()"))
+  laptop_id  Bytes
+  parent_id  Bytes?
+  account_id Bytes
+  body       String
+
+  Laptop   Laptop    @relation(fields: [laptop_id], references: [id])
+  Comment  Comment?  @relation("CommentToComment", fields: [parent_id], references: [id])
+  Comments Comment[] @relation("CommentToComment")
+  Account  Account   @relation(fields: [account_id], references: [id])
+}
+
+model Chat {
+  id         Bytes    @id @default(dbgenerated("uuid_generate_v4()"))
+  account_id Bytes
+  message    String
+  created_at DateTime @default(now())
+
+  Account Account @relation(fields: [account_id], references: [id])
+}
+
+enum Color {
+  Red
+  Blue
+  Green
+  Black
+  White
+  Silver
+  Gold
+}
+
+enum PaymentType {
+  VNPay
+  Momo
+  ZaloPay
+}
+
+enum OrderStatus {
+  Pending
+  Shipping
+  Delivered
+  Cancelled
+}

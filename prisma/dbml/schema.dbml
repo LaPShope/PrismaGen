@@ -1,0 +1,142 @@
+//// ------------------------------------------------------
+//// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+//// ------------------------------------------------------
+
+Table Account {
+  id Bytes [pk]
+  email String [unique, not null]
+  name String
+  password String [not null]
+  role Role [not null, default: 'Customer']
+  Customer Customer
+  Admin Admin
+  Comment Comment [not null]
+  Chat Chat [not null]
+}
+
+Table Customer {
+  account_id Bytes [pk]
+  Payment Payment [not null]
+  Account Account [not null]
+}
+
+Table Admin {
+  account_id Bytes [pk]
+  Account Account [not null]
+}
+
+Table Laptop {
+  id Bytes [pk]
+  name String [not null]
+  brand String [not null]
+  description String [not null]
+  Laptop_Details Laptop_Details [not null]
+  Comment Comment [not null]
+}
+
+Table Laptop_Details {
+  id Bytes [pk]
+  mac_id String [unique, not null]
+  laptop_id Bytes [not null]
+  price Int [not null]
+  color Color [not null]
+  Laptop Laptop [not null]
+  LaptopDetail_Image LaptopDetails_Image [not null]
+}
+
+Table Payment {
+  id Bytes [pk]
+  customer_id Bytes [not null]
+  laptop_id String [not null]
+  amount Int [not null]
+  price Decimal [not null]
+  Customer Customer [not null]
+}
+
+Table PaymentMethod {
+  id Bytes [pk]
+  data Json [not null]
+  type PaymentType [not null]
+}
+
+Table LaptopDetails_Image {
+  id String [pk]
+  laptop_detail_id Bytes
+  image_id Bytes
+  Image Image
+  Laptop_Details Laptop_Details
+}
+
+Table Image {
+  id Bytes [pk]
+  image_url String [not null]
+  LaptopDetail_Image LaptopDetails_Image [not null]
+}
+
+Table Comment {
+  id Bytes [pk]
+  laptop_id Bytes [not null]
+  parent_id Bytes
+  account_id Bytes [not null]
+  body String [not null]
+  Laptop Laptop [not null]
+  Comment Comment
+  Comments Comment [not null]
+  Account Account [not null]
+}
+
+Table Chat {
+  id Bytes [pk]
+  account_id Bytes [not null]
+  message String [not null]
+  created_at DateTime [default: `now()`, not null]
+  Account Account [not null]
+}
+
+Enum Role {
+  Customer
+  Admin
+}
+
+Enum Color {
+  Red
+  Blue
+  Green
+  Black
+  White
+  Silver
+  Gold
+}
+
+Enum PaymentType {
+  VNPay
+  Momo
+  ZaloPay
+}
+
+Enum OrderStatus {
+  Pending
+  Shipping
+  Delivered
+  Cancelled
+}
+
+Ref: Customer.account_id - Account.id
+
+Ref: Admin.account_id - Account.id
+
+Ref: Laptop_Details.laptop_id > Laptop.id
+
+Ref: Payment.customer_id > Customer.account_id
+
+Ref: LaptopDetails_Image.image_id > Image.id
+
+Ref: LaptopDetails_Image.laptop_detail_id > Laptop_Details.id
+
+Ref: Comment.laptop_id > Laptop.id
+
+Ref: Comment.parent_id - Comment.id
+
+Ref: Comment.account_id > Account.id
+
+Ref: Chat.account_id > Account.id
