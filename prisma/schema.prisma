@@ -26,7 +26,6 @@ model Account {
   Customer Customer?
   Admin    Admin?
   Comment  Comment[]
-  Chat     Chat[]
 }
 
 enum Role {
@@ -35,45 +34,47 @@ enum Role {
 }
 
 model Customer {
-  account_id Bytes @id
+  accountId Bytes @id
 
   Payment Payment[]
-  Account Account   @relation(fields: [account_id], references: [id])
+  Account Account   @relation(fields: [accountId], references: [id])
 }
 
 model Admin {
-  account_id Bytes   @id
-  Account    Account @relation(fields: [account_id], references: [id])
+  accountId Bytes   @id
+  Account   Account @relation(fields: [accountId], references: [id])
 }
 
 model Laptop {
-  id             Bytes            @id @default(dbgenerated("uuid_generate_v4()"))
-  name           String
-  brand          String
-  description    String
-  Laptop_Details Laptop_Details[]
-  Comment        Comment[]
+  id            Bytes           @id @default(dbgenerated("uuid_generate_v4()"))
+  name          String
+  brand         String
+  description   String
+  LaptopDetails LaptopDetails[]
+  Comment       Comment[]
 }
 
-model Laptop_Details {
-  id        Bytes  @id @default(dbgenerated("uuid_generate_v4()"))
-  mac_id    String @unique
-  laptop_id Bytes
-  price     Int
-  color     Color
+model LaptopDetails {
+  id       Bytes   @id @default(dbgenerated("uuid_generate_v4()"))
+  macId    String  @unique
+  laptopId Bytes
+  price    Decimal @db.Decimal(10, 2)
+  color    Color
 
-  Laptop             Laptop                @relation(fields: [laptop_id], references: [id])
-  LaptopDetail_Image LaptopDetails_Image[]
+  Laptop              Laptop                 @relation(fields: [laptopId], references: [id])
+  LaptopDetailOnImage LaptopDetailsOnImage[]
 }
+
+
 
 model Payment {
-  id          Bytes   @id @default(dbgenerated("uuid_generate_v4()"))
-  customer_id Bytes
-  laptop_id   String
-  amount      Int
-  price       Decimal @db.Decimal(10, 2)
+  id         Bytes   @id @default(dbgenerated("uuid_generate_v4()"))
+  customerId Bytes
+  laptopId   String
+  amount     Int
+  price      Decimal @db.Decimal(10, 2)
 
-  Customer Customer @relation(fields: [customer_id], references: [account_id])
+  Customer Customer @relation(fields: [customerId], references: [accountId])
 }
 
 model PaymentMethod {
@@ -82,42 +83,41 @@ model PaymentMethod {
   type PaymentType
 }
 
-model LaptopDetails_Image {
-  id               String @id @default(dbgenerated("uuid_generate_v4()"))
-  laptop_detail_id Bytes?
-  image_id         Bytes?
+model LaptopDetailsOnImage {
+  id              String @id @default(dbgenerated("uuid_generate_v4()"))
+  laptopDetailsId Bytes?
+  imageId         Bytes?
 
-  Image          Image?          @relation(fields: [image_id], references: [id])
-  Laptop_Details Laptop_Details? @relation(fields: [laptop_detail_id], references: [id])
+  Image         Image?         @relation(fields: [imageId], references: [id])
+  LaptopDetails LaptopDetails? @relation(fields: [laptopDetailsId], references: [id])
 }
 
 model Image {
-  id        Bytes  @id @default(dbgenerated("uuid_generate_v4()"))
-  image_url String
+  id       Bytes  @id @default(dbgenerated("uuid_generate_v4()"))
+  imageUrl String
 
-  LaptopDetail_Image LaptopDetails_Image[]
+  LaptopDetailsOnImage LaptopDetailsOnImage[]
 }
 
 model Comment {
-  id         Bytes  @id @default(dbgenerated("uuid_generate_v4()"))
-  laptop_id  Bytes
-  parent_id  Bytes?
-  account_id Bytes
-  body       String
+  id        Bytes  @id @default(dbgenerated("uuid_generate_v4()"))
+  laptopId  Bytes
+  parentId  Bytes?
+  accountId Bytes
+  body      String
 
-  Laptop   Laptop    @relation(fields: [laptop_id], references: [id])
-  Comment  Comment?  @relation("CommentToComment", fields: [parent_id], references: [id])
+  Laptop   Laptop    @relation(fields: [laptopId], references: [id])
+  Comment  Comment?  @relation("CommentToComment", fields: [parentId], references: [id])
   Comments Comment[] @relation("CommentToComment")
-  Account  Account   @relation(fields: [account_id], references: [id])
+  Account  Account   @relation(fields: [accountId], references: [id])
 }
 
 model Chat {
   id         Bytes    @id @default(dbgenerated("uuid_generate_v4()"))
-  account_id Bytes
+  senderId   Bytes
+  receiverId Bytes
   message    String
-  created_at DateTime @default(now())
-
-  Account Account @relation(fields: [account_id], references: [id])
+  createAt   DateTime @default(now())
 }
 
 enum Color {

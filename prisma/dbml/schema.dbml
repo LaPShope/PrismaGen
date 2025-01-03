@@ -11,17 +11,16 @@ Table Account {
   Customer Customer
   Admin Admin
   Comment Comment [not null]
-  Chat Chat [not null]
 }
 
 Table Customer {
-  account_id Bytes [pk]
+  accountId Bytes [pk]
   Payment Payment [not null]
   Account Account [not null]
 }
 
 Table Admin {
-  account_id Bytes [pk]
+  accountId Bytes [pk]
   Account Account [not null]
 }
 
@@ -30,24 +29,24 @@ Table Laptop {
   name String [not null]
   brand String [not null]
   description String [not null]
-  Laptop_Details Laptop_Details [not null]
+  LaptopDetails LaptopDetails [not null]
   Comment Comment [not null]
 }
 
-Table Laptop_Details {
+Table LaptopDetails {
   id Bytes [pk]
-  mac_id String [unique, not null]
-  laptop_id Bytes [not null]
-  price Int [not null]
+  macId String [unique, not null]
+  laptopId Bytes [not null]
+  price Decimal [not null]
   color Color [not null]
   Laptop Laptop [not null]
-  LaptopDetail_Image LaptopDetails_Image [not null]
+  LaptopDetailOnImage LaptopDetailsOnImage [not null]
 }
 
 Table Payment {
   id Bytes [pk]
-  customer_id Bytes [not null]
-  laptop_id String [not null]
+  customerId Bytes [not null]
+  laptopId String [not null]
   amount Int [not null]
   price Decimal [not null]
   Customer Customer [not null]
@@ -59,25 +58,25 @@ Table PaymentMethod {
   type PaymentType [not null]
 }
 
-Table LaptopDetails_Image {
+Table LaptopDetailsOnImage {
   id String [pk]
-  laptop_detail_id Bytes
-  image_id Bytes
+  laptopDetailsId Bytes
+  imageId Bytes
   Image Image
-  Laptop_Details Laptop_Details
+  LaptopDetails LaptopDetails
 }
 
 Table Image {
   id Bytes [pk]
-  image_url String [not null]
-  LaptopDetail_Image LaptopDetails_Image [not null]
+  imageUrl String [not null]
+  LaptopDetailsOnImage LaptopDetailsOnImage [not null]
 }
 
 Table Comment {
   id Bytes [pk]
-  laptop_id Bytes [not null]
-  parent_id Bytes
-  account_id Bytes [not null]
+  laptopId Bytes [not null]
+  parentId Bytes
+  accountId Bytes [not null]
   body String [not null]
   Laptop Laptop [not null]
   Comment Comment
@@ -87,10 +86,10 @@ Table Comment {
 
 Table Chat {
   id Bytes [pk]
-  account_id Bytes [not null]
+  senderId Bytes [not null]
+  receiverId Bytes [not null]
   message String [not null]
-  created_at DateTime [default: `now()`, not null]
-  Account Account [not null]
+  createAt DateTime [default: `now()`, not null]
 }
 
 Enum Role {
@@ -121,22 +120,20 @@ Enum OrderStatus {
   Cancelled
 }
 
-Ref: Customer.account_id - Account.id
+Ref: Customer.accountId - Account.id
 
-Ref: Admin.account_id - Account.id
+Ref: Admin.accountId - Account.id
 
-Ref: Laptop_Details.laptop_id > Laptop.id
+Ref: LaptopDetails.laptopId > Laptop.id
 
-Ref: Payment.customer_id > Customer.account_id
+Ref: Payment.customerId > Customer.accountId
 
-Ref: LaptopDetails_Image.image_id > Image.id
+Ref: LaptopDetailsOnImage.imageId > Image.id
 
-Ref: LaptopDetails_Image.laptop_detail_id > Laptop_Details.id
+Ref: LaptopDetailsOnImage.laptopDetailsId > LaptopDetails.id
 
-Ref: Comment.laptop_id > Laptop.id
+Ref: Comment.laptopId > Laptop.id
 
-Ref: Comment.parent_id - Comment.id
+Ref: Comment.parentId - Comment.id
 
-Ref: Comment.account_id > Account.id
-
-Ref: Chat.account_id > Account.id
+Ref: Comment.accountId > Account.id
