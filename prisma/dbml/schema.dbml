@@ -11,12 +11,15 @@ Table Account {
   Customer Customer
   Admin Admin
   Comment Comment [not null]
+  Sender Chat [not null]
+  Receiver Chat [not null]
 }
 
 Table Customer {
   accountId Bytes [pk]
-  Payment Payment [not null]
   Account Account [not null]
+  Payment Payment [not null]
+  Order Order [not null]
 }
 
 Table Admin {
@@ -24,64 +27,94 @@ Table Admin {
   Account Account [not null]
 }
 
-Table Laptop {
+Table LaptopModel {
   id Bytes [pk]
   name String [not null]
   brand String [not null]
+  cpu String [not null]
+  ram String [not null]
+  storage String [not null]
+  display String [not null]
+  color Color [not null]
+  price Decimal [not null]
   description String [not null]
-  LaptopDetails LaptopDetails [not null]
   Comment Comment [not null]
+  Laptop Laptop [not null]
+  LaptopModelOnImage LaptopModelOnImage [not null]
 }
 
-Table LaptopDetails {
+Table Laptop {
+  macId Bytes [pk]
+  MFG DateTime [not null]
+  modelId Bytes [not null]
+  status LaptopStatus [not null, default: 'Available']
+  LaptopModel LaptopModel [not null]
+}
+
+Table Order {
   id Bytes [pk]
-  macId String [unique, not null]
+  customerId Bytes [not null]
+  status OrderStatus [not null, default: 'Pending']
+  OrderDetail OrderDetail [not null]
+  Payment Payment
+  Customer Customer [not null]
+}
+
+Table OrderDetail {
+  id Bytes [pk]
+  orderId Bytes [not null]
   laptopId Bytes [not null]
+  amount Int [not null]
   price Decimal [not null]
-  color Color [not null]
-  Laptop Laptop [not null]
-  LaptopDetailOnImage LaptopDetailsOnImage [not null]
+  Order Order [not null]
 }
 
 Table Payment {
   id Bytes [pk]
   customerId Bytes [not null]
-  laptopId String [not null]
-  amount Int [not null]
-  price Decimal [not null]
+  orderId Bytes [unique, not null]
+  type PaymentType [not null]
+  status PaymentStatus [not null]
+  paymentMethodId Bytes
+  Order Order [not null]
   Customer Customer [not null]
+  PaymentMethod PaymentMethod
 }
 
 Table PaymentMethod {
   id Bytes [pk]
   data Json [not null]
   type PaymentType [not null]
+  Payment Payment [not null]
 }
 
-Table LaptopDetailsOnImage {
-  id String [pk]
-  laptopDetailsId Bytes
-  imageId Bytes
-  Image Image
-  LaptopDetails LaptopDetails
+Table LaptopModelOnImage {
+  laptopModelId Bytes [not null]
+  imageId Bytes [not null]
+  LaptopModel LaptopModel [not null]
+  Image Image [not null]
+
+  indexes {
+    (laptopModelId, imageId) [pk]
+  }
 }
 
 Table Image {
   id Bytes [pk]
   imageUrl String [not null]
-  LaptopDetailsOnImage LaptopDetailsOnImage [not null]
+  LaptopModelOnImage LaptopModelOnImage [not null]
 }
 
 Table Comment {
   id Bytes [pk]
-  laptopId Bytes [not null]
-  parentId Bytes
+  laptopModelId Bytes [not null]
   accountId Bytes [not null]
+  parentId Bytes
   body String [not null]
-  Laptop Laptop [not null]
-  Comment Comment
-  Comments Comment [not null]
+  LaptopModel LaptopModel [not null]
   Account Account [not null]
+  Parent Comment
+  Replies Comment [not null]
 }
 
 Table Chat {
@@ -90,6 +123,8 @@ Table Chat {
   receiverId Bytes [not null]
   message String [not null]
   createAt DateTime [default: `now()`, not null]
+  Sender Account [not null]
+  Receiver Account [not null]
 }
 
 Enum Role {
@@ -111,29 +146,54 @@ Enum PaymentType {
   VNPay
   Momo
   ZaloPay
+  CashOnDelivery
+}
+
+Enum PaymentStatus {
+  Pending
+  Success
+  Failed
 }
 
 Enum OrderStatus {
   Pending
-  Shipping
+  Shipped
   Delivered
   Cancelled
+}
+
+Enum LaptopStatus {
+  Available
+  SoldOut
+  Maintenance
 }
 
 Ref: Customer.accountId - Account.id
 
 Ref: Admin.accountId - Account.id
 
-Ref: LaptopDetails.laptopId > Laptop.id
+Ref: Laptop.modelId > LaptopModel.id
+
+Ref: Order.customerId > Customer.accountId
+
+Ref: OrderDetail.orderId > Order.id
+
+Ref: Payment.orderId - Order.id
 
 Ref: Payment.customerId > Customer.accountId
 
-Ref: LaptopDetailsOnImage.imageId > Image.id
+Ref: Payment.paymentMethodId > PaymentMethod.id
 
-Ref: LaptopDetailsOnImage.laptopDetailsId > LaptopDetails.id
+Ref: LaptopModelOnImage.laptopModelId > LaptopModel.id
 
-Ref: Comment.laptopId > Laptop.id
+Ref: LaptopModelOnImage.imageId > Image.id
 
-Ref: Comment.parentId - Comment.id
+Ref: Comment.laptopModelId > LaptopModel.id
 
 Ref: Comment.accountId > Account.id
+
+Ref: Comment.parentId > Comment.id
+
+Ref: Chat.senderId > Account.id
+
+Ref: Chat.receiverId > Account.id

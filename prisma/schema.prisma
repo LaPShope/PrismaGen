@@ -1,6 +1,5 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
@@ -27,12 +26,14 @@ model Account {
   Customer Customer?
   Admin    Admin?
   Comment  Comment[]
+
+  Sender   Chat[] @relation("Sender")
+  Receiver Chat[] @relation("Receiver")
 }
 
 model Customer {
   accountId Bytes @id
 
-  // Payment Payment[]
   Account Account   @relation(fields: [accountId], references: [id])
   Payment Payment[]
   Order   Order[]
@@ -43,28 +44,32 @@ model Admin {
   Account   Account @relation(fields: [accountId], references: [id])
 }
 
-model Laptop {
-  id          Bytes  @id @default(dbgenerated("uuid_generate_v4()"))
+model LaptopModel {
+  id          Bytes   @id @default(dbgenerated("uuid_generate_v4()"))
   name        String
   brand       String
+  cpu         String
+  ram         String
+  storage     String
+  display     String
+  color       Color
+  price       Decimal @db.Decimal(10, 2)
   description String
 
-  LaptopDetails LaptopDetails[]
-  Comment       Comment[]
+  Comment            Comment[]
+  Laptop             Laptop[]
+  LaptopModelOnImage LaptopModelOnImage[]
 
   @@index([brand])
 }
 
-model LaptopDetails {
-  id       Bytes        @id @default(dbgenerated("uuid_generate_v4()"))
-  macId    String       @unique
-  laptopId Bytes
-  price    Decimal      @db.Decimal(10, 2)
-  color    Color
-  status   LaptopStatus @default(Available)
+model Laptop {
+  macId   Bytes        @id
+  MFG     DateTime
+  modelId Bytes
+  status  LaptopStatus @default(Available)
 
-  Laptop              Laptop                 @relation(fields: [laptopId], references: [id])
-  LaptopDetailOnImage LaptopDetailsOnImage[]
+  LaptopModel LaptopModel @relation(fields: [modelId], references: [id])
 }
 
 model Order {
@@ -72,9 +77,10 @@ model Order {
   customerId Bytes
   status     OrderStatus @default(Pending)
 
-  Customer    Customer      @relation(fields: [customerId], references: [accountId])
   OrderDetail OrderDetail[]
   Payment     Payment?
+
+  Customer Customer @relation(fields: [customerId], references: [accountId])
 
   @@index([customerId])
 }
@@ -110,33 +116,36 @@ model PaymentMethod {
   Payment Payment[]
 }
 
-model LaptopDetailsOnImage {
-  id              String @id @default(dbgenerated("uuid_generate_v4()"))
-  laptopDetailsId Bytes?
-  imageId         Bytes?
+model LaptopModelOnImage {
+  laptopModelId Bytes // @id
+  imageId       Bytes // @id
 
-  Image         Image?         @relation(fields: [imageId], references: [id])
-  LaptopDetails LaptopDetails? @relation(fields: [laptopDetailsId], references: [id])
+  LaptopModel LaptopModel @relation(fields: [laptopModelId], references: [id])
+  Image       Image       @relation(fields: [imageId], references: [id])
+
+  @@id([laptopModelId, imageId])
 }
 
 model Image {
   id       Bytes  @id @default(dbgenerated("uuid_generate_v4()"))
   imageUrl String
 
-  LaptopDetailsOnImage LaptopDetailsOnImage[]
+  LaptopModelOnImage LaptopModelOnImage[]
 }
 
+// one reply comment just have only partent comment
+// one comment can have many replies
 model Comment {
-  id        Bytes  @id @default(dbgenerated("uuid_generate_v4()"))
-  laptopId  Bytes
-  parentId  Bytes?
-  accountId Bytes
-  body      String
+  id            Bytes  @id @default(dbgenerated("uuid_generate_v4()"))
+  laptopModelId Bytes
+  accountId     Bytes
+  parentId      Bytes?
+  body          String
 
-  Laptop   Laptop    @relation(fields: [laptopId], references: [id])
-  Comment  Comment?  @relation("CommentToComment", fields: [parentId], references: [id])
-  Comments Comment[] @relation("CommentToComment")
-  Account  Account   @relation(fields: [accountId], references: [id])
+  LaptopModel LaptopModel @relation(fields: [laptopModelId], references: [id])
+  Account     Account     @relation(fields: [accountId], references: [id])
+  Parent      Comment?    @relation("Parent", fields: [parentId], references: [id])
+  Replies     Comment[]   @relation("Parent")
 }
 
 model Chat {
@@ -145,6 +154,9 @@ model Chat {
   receiverId Bytes
   message    String
   createAt   DateTime @default(now())
+
+  Sender   Account @relation("Sender", fields: [senderId], references: [id])
+  Receiver Account @relation("Receiver", fields: [receiverId], references: [id])
 }
 
 enum Role {
@@ -185,4 +197,5 @@ enum OrderStatus {
 enum LaptopStatus {
   Available
   SoldOut
+  Maintenance
 }
