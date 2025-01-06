@@ -20,6 +20,8 @@ Table Customer {
   Account Account [not null]
   Payment Payment [not null]
   Order Order [not null]
+  Address Address [not null]
+  Cart Cart [not null]
 }
 
 Table Admin {
@@ -36,11 +38,13 @@ Table LaptopModel {
   storage String [not null]
   display String [not null]
   color Color [not null]
-  price Decimal [not null]
-  description String [not null]
+  description String
   Comment Comment [not null]
   Laptop Laptop [not null]
   LaptopModelOnImage LaptopModelOnImage [not null]
+  LaptopModelOnSale LaptopModelOnSale [not null]
+  LaptopModelPricing LaptopModelPricing [not null]
+  OrderDetail OrderDetail [not null]
 }
 
 Table Laptop {
@@ -49,6 +53,17 @@ Table Laptop {
   modelId Bytes [not null]
   status LaptopStatus [not null, default: 'Available']
   LaptopModel LaptopModel [not null]
+  Cart Cart [not null]
+}
+
+Table LaptopModelPricing {
+  id Bytes [pk]
+  laptopModelId Bytes [not null]
+  price Decimal [not null]
+  startAt DateTime [not null]
+  inActive Boolean [not null, default: false]
+  LaptopModel LaptopModel [not null]
+  OrderDetail OrderDetail [not null]
 }
 
 Table Order {
@@ -63,10 +78,12 @@ Table Order {
 Table OrderDetail {
   id Bytes [pk]
   orderId Bytes [not null]
-  laptopId Bytes [not null]
-  amount Int [not null]
-  price Decimal [not null]
+  laptopModelId Bytes [not null]
+  quantity Int [not null]
+  laptopModelPricingId Bytes [not null]
   Order Order [not null]
+  LaptopModel LaptopModel [not null]
+  LaptopModelPricing LaptopModelPricing [not null]
 }
 
 Table Payment {
@@ -127,6 +144,46 @@ Table Chat {
   Receiver Account [not null]
 }
 
+Table LaptopModelOnSale {
+  laptopModelId Bytes [not null]
+  saleId Bytes [not null]
+  LaptopModel LaptopModel [not null]
+  Sale Sale [not null]
+
+  indexes {
+    (laptopModelId, saleId) [pk]
+  }
+}
+
+Table Sale {
+  id Bytes [pk]
+  name String [not null]
+  discount Int [not null]
+  startAt DateTime [not null]
+  endAt DateTime [not null]
+  LaptopModelOnSale LaptopModelOnSale [not null]
+}
+
+Table Address {
+  id Bytes [pk]
+  customerId Bytes [not null]
+  city String [not null]
+  district String [not null]
+  ward String
+  street String [not null]
+  phone String [not null]
+  Customer Customer [not null]
+}
+
+Table Cart {
+  id Bytes [pk]
+  customerId Bytes [not null]
+  laptopId Bytes [not null]
+  quantity Int [not null]
+  Customer Customer [not null]
+  Laptop Laptop [not null]
+}
+
 Enum Role {
   Customer
   Admin
@@ -174,9 +231,15 @@ Ref: Admin.accountId - Account.id
 
 Ref: Laptop.modelId > LaptopModel.id
 
+Ref: LaptopModelPricing.laptopModelId > LaptopModel.id
+
 Ref: Order.customerId > Customer.accountId
 
 Ref: OrderDetail.orderId > Order.id
+
+Ref: OrderDetail.laptopModelId > LaptopModel.id
+
+Ref: OrderDetail.laptopModelPricingId > LaptopModelPricing.id
 
 Ref: Payment.orderId - Order.id
 
@@ -192,8 +255,18 @@ Ref: Comment.laptopModelId > LaptopModel.id
 
 Ref: Comment.accountId > Account.id
 
-Ref: Comment.parentId > Comment.id
+Ref: Comment.parentId - Comment.id
 
 Ref: Chat.senderId > Account.id
 
 Ref: Chat.receiverId > Account.id
+
+Ref: LaptopModelOnSale.laptopModelId > LaptopModel.id
+
+Ref: LaptopModelOnSale.saleId > Sale.id
+
+Ref: Address.customerId > Customer.accountId
+
+Ref: Cart.customerId > Customer.accountId
+
+Ref: Cart.laptopId > Laptop.macId
