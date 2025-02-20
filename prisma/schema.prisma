@@ -32,9 +32,9 @@ model Account {
 }
 
 model Customer {
-  accountId Bytes @id
+  account_id Bytes @id
 
-  Account Account   @relation(fields: [accountId], references: [id])
+  Account Account   @relation(fields: [account_id], references: [id])
   Payment Payment[]
   Order   Order[]
   Address Address[]
@@ -42,8 +42,8 @@ model Customer {
 }
 
 model Admin {
-  accountId Bytes   @id
-  Account   Account @relation(fields: [accountId], references: [id])
+  account_id Bytes   @id
+  Account    Account @relation(fields: [account_id], references: [id])
 }
 
 model LaptopModel {
@@ -55,96 +55,102 @@ model LaptopModel {
   storage     String
   display     String
   color       Color
+  price       Decimal @db.Decimal(10, 2)
   description String?
 
   Comment            Comment[]
   Laptop             Laptop[]
   LaptopModelOnImage LaptopModelOnImage[]
-  LaptopModelOnSale  LaptopModelOnSale[]
-  LaptopModelPricing LaptopModelPricing[]
   OrderDetail        OrderDetail[]
+  LaptopModelOnSale  LaptopModelOnSale[]
 
   @@index([cpu])
   @@index([ram])
   @@index([brand])
   @@index([cpu, ram])
   @@index([cpu, ram, brand])
+  @@index([cpu, ram, brand, price])
+}
+
+model LaptopModelOnSale {
+  laptop_model_id Bytes
+  sale_id         Bytes
+
+  LaptopModel LaptopModel @relation(fields: [laptop_model_id], references: [id])
+  Sale        Sale        @relation(fields: [sale_id], references: [id])
+
+  @@id([laptop_model_id, sale_id])
+}
+
+model Sale {
+  id                Bytes    @id @default(dbgenerated("uuid_generate_v4()"))
+  event_description String?
+  start_at          DateTime
+  end_at            DateTime
+  discount          Float
+
+  LaptopModelOnSale LaptopModelOnSale[]
 }
 
 model Laptop {
-  macId   Bytes        @id
-  MFG     DateTime
-  modelId Bytes
-  status  LaptopStatus @default(Available)
+  mac_id   Bytes        @id
+  MFG      DateTime
+  model_id Bytes
+  status   LaptopStatus @default(Available)
 
-  LaptopModel LaptopModel @relation(fields: [modelId], references: [id])
+  LaptopModel LaptopModel @relation(fields: [model_id], references: [id])
   Cart        Cart[]
 
   @@index([status])
-  @@index([modelId])
-}
-
-model LaptopModelPricing {
-  id            Bytes    @id @default(dbgenerated("uuid_generate_v4()"))
-  laptopModelId Bytes
-  price         Decimal  @db.Decimal(10, 2)
-  startAt       DateTime
-  inActive      Boolean  @default(false)
-
-  LaptopModel LaptopModel   @relation(fields: [laptopModelId], references: [id])
-  OrderDetail OrderDetail[]
-
-  @@index([price])
-  @@index([startAt])
+  @@index([model_id])
 }
 
 model Order {
-  id         Bytes       @id @default(dbgenerated("uuid_generate_v4()"))
-  customerId Bytes
-  status     OrderStatus @default(Pending)
-  address    String
+  id          Bytes       @id @default(dbgenerated("uuid_generate_v4()"))
+  customer_id Bytes
+  status      OrderStatus @default(Pending)
+  address     String
+  date_create DateTime    @default(now())
 
   OrderDetail OrderDetail[]
   Payment     Payment?
-  Customer    Customer      @relation(fields: [customerId], references: [accountId])
+  Customer    Customer      @relation(fields: [customer_id], references: [account_id])
 
-  @@index([customerId])
+  @@index([customer_id])
   @@index([status])
 }
 
 model OrderDetail {
-  id                   Bytes @id @default(dbgenerated("uuid_generate_v4()")) //(id, orderId, laptopId)
-  orderId              Bytes
-  laptopModelId        Bytes
-  quantity             Int
-  laptopModelPricingId Bytes // when the laptop's price changes, the order's price should not change. this filed will be updated after confirm cart and before payment
+  id              Bytes   @id @default(dbgenerated("uuid_generate_v4()")) //(id, orderId, laptopId)
+  order_id        Bytes
+  laptop_model_id Bytes
+  quantity        Int
+  price           Decimal @db.Decimal(10, 2)
 
-  Order              Order              @relation(fields: [orderId], references: [id])
-  LaptopModel        LaptopModel        @relation(fields: [laptopModelId], references: [id])
-  LaptopModelPricing LaptopModelPricing @relation(fields: [laptopModelPricingId], references: [id])
+  Order       Order       @relation(fields: [order_id], references: [id])
+  LaptopModel LaptopModel @relation(fields: [laptop_model_id], references: [id])
 
-  @@index([orderId])
-  @@index([laptopModelId])
-  @@index([laptopModelPricingId])
+  @@index([order_id])
+  @@index([laptop_model_id])
 }
 
 model Payment {
-  id              Bytes         @id
-  customerId      Bytes
-  orderId         Bytes         @unique
-  type            PaymentType
-  status          PaymentStatus
-  paymentMethodId Bytes?
+  id                Bytes         @id
+  customer_id       Bytes
+  order_id          Bytes         @unique
+  type              PaymentType
+  status            PaymentStatus
+  payment_method_id Bytes?
 
-  Order         Order          @relation(fields: [orderId], references: [id])
-  Customer      Customer       @relation(fields: [customerId], references: [accountId])
-  PaymentMethod PaymentMethod? @relation(fields: [paymentMethodId], references: [id])
+  Order         Order          @relation(fields: [order_id], references: [id])
+  Customer      Customer       @relation(fields: [customer_id], references: [account_id])
+  PaymentMethod PaymentMethod? @relation(fields: [payment_method_id], references: [id])
 
-  @@index([customerId])
-  @@index([orderId])
+  @@index([customer_id])
+  @@index([order_id])
   @@index([status])
   @@index([type])
-  @@index([paymentMethodId])
+  @@index([payment_method_id])
 }
 
 model PaymentMethod {
@@ -158,95 +164,75 @@ model PaymentMethod {
 }
 
 model LaptopModelOnImage {
-  laptopModelId Bytes
-  imageId       Bytes
+  laptop_model_id Bytes
+  image_id        Bytes
 
-  LaptopModel LaptopModel @relation(fields: [laptopModelId], references: [id])
-  Image       Image       @relation(fields: [imageId], references: [id])
+  LaptopModel LaptopModel @relation(fields: [laptop_model_id], references: [id])
+  Image       Image       @relation(fields: [image_id], references: [id])
 
-  @@id([laptopModelId, imageId])
+  @@id([laptop_model_id, image_id])
 }
 
 model Image {
-  id       Bytes  @id @default(dbgenerated("uuid_generate_v4()"))
-  imageUrl String
+  id        Bytes  @id @default(dbgenerated("uuid_generate_v4()"))
+  image_url String
 
   LaptopModelOnImage LaptopModelOnImage[]
 }
 
 model Comment {
-  id            Bytes  @id @default(dbgenerated("uuid_generate_v4()"))
-  laptopModelId Bytes
-  accountId     Bytes
-  parentId      Bytes?
-  body          String
+  id              Bytes  @id @default(dbgenerated("uuid_generate_v4()"))
+  laptop_model_id Bytes
+  account_id      Bytes
+  parent_id       Bytes?
+  body            String
 
-  LaptopModel LaptopModel @relation(fields: [laptopModelId], references: [id])
-  Account     Account     @relation(fields: [accountId], references: [id])
-  Parent      Comment?    @relation("Parent", fields: [parentId], references: [id])
+  LaptopModel LaptopModel @relation(fields: [laptop_model_id], references: [id])
+  Account     Account     @relation(fields: [account_id], references: [id])
+  Parent      Comment?    @relation("Parent", fields: [parent_id], references: [id])
   Replies     Comment[]   @relation("Parent")
 
-  @@index([laptopModelId])
-  @@index([accountId])
-  @@index([parentId])
+  @@index([laptop_model_id])
+  @@index([account_id])
+  @@index([parent_id])
 }
 
 model Chat {
-  id         Bytes    @id @default(dbgenerated("uuid_generate_v4()"))
-  senderId   Bytes
-  receiverId Bytes
-  message    String
-  createAt   DateTime @default(now())
+  id          Bytes    @id @default(dbgenerated("uuid_generate_v4()"))
+  sender_id   Bytes
+  receiver_id Bytes
+  message     String
+  create_at   DateTime @default(now())
 
-  Sender   Account @relation("Sender", fields: [senderId], references: [id])
-  Receiver Account @relation("Receiver", fields: [receiverId], references: [id])
-}
-
-model LaptopModelOnSale {
-  laptopModelId Bytes
-  saleId        Bytes
-
-  LaptopModel LaptopModel @relation(fields: [laptopModelId], references: [id])
-  Sale        Sale        @relation(fields: [saleId], references: [id])
-
-  @@id([laptopModelId, saleId])
-}
-
-model Sale {
-  id       Bytes    @id @default(dbgenerated("uuid_generate_v4()"))
-  name     String
-  discount Int
-  startAt  DateTime
-  endAt    DateTime
-
-  LaptopModelOnSale LaptopModelOnSale[]
+  Sender   Account @relation("Sender", fields: [sender_id], references: [id])
+  Receiver Account @relation("Receiver", fields: [receiver_id], references: [id])
 }
 
 model Address {
-  id         Bytes   @id @default(dbgenerated("uuid_generate_v4()"))
-  customerId Bytes
-  city       String
-  district   String
-  ward       String?
-  street     String
-  phone      String
+  id          Bytes   @id @default(dbgenerated("uuid_generate_v4()"))
+  customer_id Bytes
+  city        String
+  district    String
+  ward        String?
+  street      String
+  phone       String
 
-  Customer Customer @relation(fields: [customerId], references: [accountId])
+  Customer Customer @relation(fields: [customer_id], references: [account_id])
 
-  @@index([customerId])
+  @@index([customer_id])
 }
 
 model Cart {
-  id         Bytes @id @default(dbgenerated("uuid_generate_v4()"))
-  customerId Bytes
-  laptopId   Bytes
-  quantity   Int
+  id          Bytes @id @default(dbgenerated("uuid_generate_v4()"))
+  customer_id Bytes
+  laptop_id   Bytes
+  quantity    Int
 
-  Customer Customer @relation(fields: [customerId], references: [accountId])
-  Laptop   Laptop   @relation(fields: [laptopId], references: [macId])
+  Customer Customer @relation(fields: [customer_id], references: [account_id])
+  Laptop   Laptop   @relation(fields: [laptop_id], references: [mac_id])
 
-  @@index([customerId])
-  @@index([laptopId])
+  @@index([customer_id])
+  @@index([laptop_id])
 }
 
 enum Role {

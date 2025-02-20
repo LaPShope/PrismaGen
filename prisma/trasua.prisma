@@ -1,0 +1,48 @@
+model Store {
+  id       Int           @id @default(autoincrement()) // key: id
+  name     String
+  address  String
+  phone    String
+  products Product[]
+  socials  SocialMedia[]
+}
+
+model SocialMedia {
+  url     String          @id
+  type    SocialMediaType
+  storeId Int
+
+  store Store @relation(fields: [storeId], references: [id])
+}
+
+model Product {
+  id           Int     @id @default(autoincrement()) // key: id
+  name         String
+  size         Size
+  type         Type
+  shopId       Int
+  price        Decimal
+  isBestSeller Boolean @default(false)
+
+  store Store @relation(fields: [shopId], references: [id])
+}
+
+enum Type {
+  Topping
+  TraSua
+  Machto
+  HoaHong
+  Special
+}
+
+enum Size {
+  S
+  M
+  L
+}
+
+enum SocialMediaType {
+  Facebook
+  Instagram
+  Tiktok
+}

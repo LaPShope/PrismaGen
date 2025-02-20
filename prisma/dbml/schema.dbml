@@ -16,7 +16,7 @@ Table Account {
 }
 
 Table Customer {
-  accountId Bytes [pk]
+  account_id Bytes [pk]
   Account Account [not null]
   Payment Payment [not null]
   Order Order [not null]
@@ -25,7 +25,7 @@ Table Customer {
 }
 
 Table Admin {
-  accountId Bytes [pk]
+  account_id Bytes [pk]
   Account Account [not null]
 }
 
@@ -38,38 +38,49 @@ Table LaptopModel {
   storage String [not null]
   display String [not null]
   color Color [not null]
+  price Decimal [not null]
   description String
   Comment Comment [not null]
   Laptop Laptop [not null]
   LaptopModelOnImage LaptopModelOnImage [not null]
-  LaptopModelOnSale LaptopModelOnSale [not null]
-  LaptopModelPricing LaptopModelPricing [not null]
   OrderDetail OrderDetail [not null]
+  LaptopModelOnSale LaptopModelOnSale [not null]
+}
+
+Table LaptopModelOnSale {
+  laptop_model_id Bytes [not null]
+  sale_id Bytes [not null]
+  LaptopModel LaptopModel [not null]
+  Sale Sale [not null]
+
+  indexes {
+    (laptop_model_id, sale_id) [pk]
+  }
+}
+
+Table Sale {
+  id Bytes [pk]
+  event_description String
+  start_at DateTime [not null]
+  end_at DateTime [not null]
+  discount Float [not null]
+  LaptopModelOnSale LaptopModelOnSale [not null]
 }
 
 Table Laptop {
-  macId Bytes [pk]
+  mac_id Bytes [pk]
   MFG DateTime [not null]
-  modelId Bytes [not null]
+  model_id Bytes [not null]
   status LaptopStatus [not null, default: 'Available']
   LaptopModel LaptopModel [not null]
   Cart Cart [not null]
 }
 
-Table LaptopModelPricing {
-  id Bytes [pk]
-  laptopModelId Bytes [not null]
-  price Decimal [not null]
-  startAt DateTime [not null]
-  inActive Boolean [not null, default: false]
-  LaptopModel LaptopModel [not null]
-  OrderDetail OrderDetail [not null]
-}
-
 Table Order {
   id Bytes [pk]
-  customerId Bytes [not null]
+  customer_id Bytes [not null]
   status OrderStatus [not null, default: 'Pending']
+  date_create DateTime [default: `now()`, not null]
   OrderDetail OrderDetail [not null]
   Payment Payment
   Customer Customer [not null]
@@ -77,22 +88,21 @@ Table Order {
 
 Table OrderDetail {
   id Bytes [pk]
-  orderId Bytes [not null]
-  laptopModelId Bytes [not null]
+  order_id Bytes [not null]
+  laptop_model_id Bytes [not null]
   quantity Int [not null]
-  laptopModelPricingId Bytes [not null]
+  price Decimal [not null]
   Order Order [not null]
   LaptopModel LaptopModel [not null]
-  LaptopModelPricing LaptopModelPricing [not null]
 }
 
 Table Payment {
   id Bytes [pk]
-  customerId Bytes [not null]
-  orderId Bytes [unique, not null]
+  customer_id Bytes [not null]
+  order_id Bytes [unique, not null]
   type PaymentType [not null]
   status PaymentStatus [not null]
-  paymentMethodId Bytes
+  payment_method_id Bytes
   Order Order [not null]
   Customer Customer [not null]
   PaymentMethod PaymentMethod
@@ -106,27 +116,27 @@ Table PaymentMethod {
 }
 
 Table LaptopModelOnImage {
-  laptopModelId Bytes [not null]
-  imageId Bytes [not null]
+  laptop_model_id Bytes [not null]
+  image_id Bytes [not null]
   LaptopModel LaptopModel [not null]
   Image Image [not null]
 
   indexes {
-    (laptopModelId, imageId) [pk]
+    (laptop_model_id, image_id) [pk]
   }
 }
 
 Table Image {
   id Bytes [pk]
-  imageUrl String [not null]
+  image_url String [not null]
   LaptopModelOnImage LaptopModelOnImage [not null]
 }
 
 Table Comment {
   id Bytes [pk]
-  laptopModelId Bytes [not null]
-  accountId Bytes [not null]
-  parentId Bytes
+  laptop_model_id Bytes [not null]
+  account_id Bytes [not null]
+  parent_id Bytes
   body String [not null]
   LaptopModel LaptopModel [not null]
   Account Account [not null]
@@ -136,37 +146,17 @@ Table Comment {
 
 Table Chat {
   id Bytes [pk]
-  senderId Bytes [not null]
-  receiverId Bytes [not null]
+  sender_id Bytes [not null]
+  receiver_id Bytes [not null]
   message String [not null]
-  createAt DateTime [default: `now()`, not null]
+  create_at DateTime [default: `now()`, not null]
   Sender Account [not null]
   Receiver Account [not null]
 }
 
-Table LaptopModelOnSale {
-  laptopModelId Bytes [not null]
-  saleId Bytes [not null]
-  LaptopModel LaptopModel [not null]
-  Sale Sale [not null]
-
-  indexes {
-    (laptopModelId, saleId) [pk]
-  }
-}
-
-Table Sale {
-  id Bytes [pk]
-  name String [not null]
-  discount Int [not null]
-  startAt DateTime [not null]
-  endAt DateTime [not null]
-  LaptopModelOnSale LaptopModelOnSale [not null]
-}
-
 Table Address {
   id Bytes [pk]
-  customerId Bytes [not null]
+  customer_id Bytes [not null]
   city String [not null]
   district String [not null]
   ward String
@@ -177,8 +167,8 @@ Table Address {
 
 Table Cart {
   id Bytes [pk]
-  customerId Bytes [not null]
-  laptopId Bytes [not null]
+  customer_id Bytes [not null]
+  laptop_id Bytes [not null]
   quantity Int [not null]
   Customer Customer [not null]
   Laptop Laptop [not null]
@@ -225,48 +215,44 @@ Enum LaptopStatus {
   Maintenance
 }
 
-Ref: Customer.accountId - Account.id
+Ref: Customer.account_id - Account.id
 
-Ref: Admin.accountId - Account.id
+Ref: Admin.account_id - Account.id
 
-Ref: Laptop.modelId > LaptopModel.id
+Ref: LaptopModelOnSale.laptop_model_id > LaptopModel.id
 
-Ref: LaptopModelPricing.laptopModelId > LaptopModel.id
+Ref: LaptopModelOnSale.sale_id > Sale.id
 
-Ref: Order.customerId > Customer.accountId
+Ref: Laptop.model_id > LaptopModel.id
 
-Ref: OrderDetail.orderId > Order.id
+Ref: Order.customer_id > Customer.account_id
 
-Ref: OrderDetail.laptopModelId > LaptopModel.id
+Ref: OrderDetail.order_id > Order.id
 
-Ref: OrderDetail.laptopModelPricingId > LaptopModelPricing.id
+Ref: OrderDetail.laptop_model_id > LaptopModel.id
 
-Ref: Payment.orderId - Order.id
+Ref: Payment.order_id - Order.id
 
-Ref: Payment.customerId > Customer.accountId
+Ref: Payment.customer_id > Customer.account_id
 
-Ref: Payment.paymentMethodId > PaymentMethod.id
+Ref: Payment.payment_method_id > PaymentMethod.id
 
-Ref: LaptopModelOnImage.laptopModelId > LaptopModel.id
+Ref: LaptopModelOnImage.laptop_model_id > LaptopModel.id
 
-Ref: LaptopModelOnImage.imageId > Image.id
+Ref: LaptopModelOnImage.image_id > Image.id
 
-Ref: Comment.laptopModelId > LaptopModel.id
+Ref: Comment.laptop_model_id > LaptopModel.id
 
-Ref: Comment.accountId > Account.id
+Ref: Comment.account_id > Account.id
 
-Ref: Comment.parentId - Comment.id
+Ref: Comment.parent_id - Comment.id
 
-Ref: Chat.senderId > Account.id
+Ref: Chat.sender_id > Account.id
 
-Ref: Chat.receiverId > Account.id
+Ref: Chat.receiver_id > Account.id
 
-Ref: LaptopModelOnSale.laptopModelId > LaptopModel.id
+Ref: Address.customer_id > Customer.account_id
 
-Ref: LaptopModelOnSale.saleId > Sale.id
+Ref: Cart.customer_id > Customer.account_id
 
-Ref: Address.customerId > Customer.accountId
-
-Ref: Cart.customerId > Customer.accountId
-
-Ref: Cart.laptopId > Laptop.macId
+Ref: Cart.laptop_id > Laptop.mac_id
