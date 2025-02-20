@@ -102,6 +102,7 @@ model Order {
   id         Bytes       @id @default(dbgenerated("uuid_generate_v4()"))
   customerId Bytes
   status     OrderStatus @default(Pending)
+  address    String
 
   OrderDetail OrderDetail[]
   Payment     Payment?
