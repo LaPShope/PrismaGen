@@ -8,25 +8,14 @@ Table Account {
   name String
   password String [not null]
   role Role [not null, default: 'Customer']
-  Customer Customer
-  Admin Admin
-  Comment Comment [not null]
-  Sender Chat [not null]
-  Receiver Chat [not null]
 }
 
 Table Customer {
   account_id Bytes [pk]
-  Account Account [not null]
-  Payment Payment [not null]
-  Order Order [not null]
-  Address Address [not null]
-  Cart Cart [not null]
 }
 
 Table Admin {
   account_id Bytes [pk]
-  Account Account [not null]
 }
 
 Table LaptopModel {
@@ -40,18 +29,11 @@ Table LaptopModel {
   color Color [not null]
   price Decimal [not null]
   description String
-  Comment Comment [not null]
-  Laptop Laptop [not null]
-  LaptopModelOnImage LaptopModelOnImage [not null]
-  OrderDetail OrderDetail [not null]
-  LaptopModelOnSale LaptopModelOnSale [not null]
 }
 
 Table LaptopModelOnSale {
   laptop_model_id Bytes [not null]
   sale_id Bytes [not null]
-  LaptopModel LaptopModel [not null]
-  Sale Sale [not null]
 
   indexes {
     (laptop_model_id, sale_id) [pk]
@@ -64,7 +46,6 @@ Table Sale {
   start_at DateTime [not null]
   end_at DateTime [not null]
   discount Float [not null]
-  LaptopModelOnSale LaptopModelOnSale [not null]
 }
 
 Table Laptop {
@@ -72,18 +53,14 @@ Table Laptop {
   MFG DateTime [not null]
   model_id Bytes [not null]
   status LaptopStatus [not null, default: 'Available']
-  LaptopModel LaptopModel [not null]
-  Cart Cart [not null]
 }
 
 Table Order {
   id Bytes [pk]
   customer_id Bytes [not null]
   status OrderStatus [not null, default: 'Pending']
+  address String [not null]
   date_create DateTime [default: `now()`, not null]
-  OrderDetail OrderDetail [not null]
-  Payment Payment
-  Customer Customer [not null]
 }
 
 Table OrderDetail {
@@ -92,8 +69,6 @@ Table OrderDetail {
   laptop_model_id Bytes [not null]
   quantity Int [not null]
   price Decimal [not null]
-  Order Order [not null]
-  LaptopModel LaptopModel [not null]
 }
 
 Table Payment {
@@ -103,23 +78,17 @@ Table Payment {
   type PaymentType [not null]
   status PaymentStatus [not null]
   payment_method_id Bytes
-  Order Order [not null]
-  Customer Customer [not null]
-  PaymentMethod PaymentMethod
 }
 
 Table PaymentMethod {
   id Bytes [pk]
   data Json [not null]
   type PaymentType [not null]
-  Payment Payment [not null]
 }
 
 Table LaptopModelOnImage {
   laptop_model_id Bytes [not null]
   image_id Bytes [not null]
-  LaptopModel LaptopModel [not null]
-  Image Image [not null]
 
   indexes {
     (laptop_model_id, image_id) [pk]
@@ -129,7 +98,6 @@ Table LaptopModelOnImage {
 Table Image {
   id Bytes [pk]
   image_url String [not null]
-  LaptopModelOnImage LaptopModelOnImage [not null]
 }
 
 Table Comment {
@@ -138,10 +106,6 @@ Table Comment {
   account_id Bytes [not null]
   parent_id Bytes
   body String [not null]
-  LaptopModel LaptopModel [not null]
-  Account Account [not null]
-  Parent Comment
-  Replies Comment [not null]
 }
 
 Table Chat {
@@ -150,8 +114,6 @@ Table Chat {
   receiver_id Bytes [not null]
   message String [not null]
   create_at DateTime [default: `now()`, not null]
-  Sender Account [not null]
-  Receiver Account [not null]
 }
 
 Table Address {
@@ -162,7 +124,6 @@ Table Address {
   ward String
   street String [not null]
   phone String [not null]
-  Customer Customer [not null]
 }
 
 Table Cart {
@@ -170,8 +131,6 @@ Table Cart {
   customer_id Bytes [not null]
   laptop_id Bytes [not null]
   quantity Int [not null]
-  Customer Customer [not null]
-  Laptop Laptop [not null]
 }
 
 Enum Role {

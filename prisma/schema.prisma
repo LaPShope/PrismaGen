@@ -9,6 +9,8 @@ generator client {
 
 generator dbml {
   provider = "prisma-dbml-generator"
+  includeRelationFields = false
+  
 }
 
 datasource db {
