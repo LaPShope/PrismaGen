@@ -2,216 +2,127 @@
 //// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 //// ------------------------------------------------------
 
-Table Account {
-  id Bytes [pk]
-  email String [unique, not null]
-  name String
-  password String [not null]
-  role Role [not null, default: 'Customer']
-}
-
-Table Customer {
-  account_id Bytes [pk]
-}
-
-Table Admin {
-  account_id Bytes [pk]
-}
-
-Table LaptopModel {
-  id Bytes [pk]
+Table Apartment {
+  id Int [pk, increment]
   name String [not null]
-  brand String [not null]
-  cpu String [not null]
-  ram String [not null]
-  storage String [not null]
-  display String [not null]
-  color Color [not null]
-  price Decimal [not null]
-  description String
-}
-
-Table LaptopModelOnSale {
-  laptop_model_id Bytes [not null]
-  sale_id Bytes [not null]
-
-  indexes {
-    (laptop_model_id, sale_id) [pk]
-  }
-}
-
-Table Sale {
-  id Bytes [pk]
-  event_description String
-  start_at DateTime [not null]
-  end_at DateTime [not null]
-  discount Float [not null]
-}
-
-Table Laptop {
-  mac_id Bytes [pk]
-  MFG DateTime [not null]
-  model_id Bytes [not null]
-  status LaptopStatus [not null, default: 'Available']
-}
-
-Table Order {
-  id Bytes [pk]
-  customer_id Bytes [not null]
-  status OrderStatus [not null, default: 'Pending']
   address String [not null]
-  date_create DateTime [default: `now()`, not null]
 }
 
-Table OrderDetail {
-  id Bytes [pk]
-  order_id Bytes [not null]
-  laptop_model_id Bytes [not null]
-  quantity Int [not null]
-  price Decimal [not null]
-}
-
-Table Payment {
-  id Bytes [pk]
-  customer_id Bytes [not null]
-  order_id Bytes [unique, not null]
-  type PaymentType [not null]
-  status PaymentStatus [not null]
-  payment_method_id Bytes
-}
-
-Table PaymentMethod {
-  id Bytes [pk]
-  data Json [not null]
-  type PaymentType [not null]
-}
-
-Table LaptopModelOnImage {
-  laptop_model_id Bytes [not null]
-  image_id Bytes [not null]
+Table Apartment_Resident {
+  apartment_id Int [not null]
+  resident_id Int [not null]
 
   indexes {
-    (laptop_model_id, image_id) [pk]
+    (apartment_id, resident_id) [pk]
   }
 }
 
-Table Image {
-  id Bytes [pk]
-  image_url String [not null]
-}
-
-Table Comment {
-  id Bytes [pk]
-  laptop_model_id Bytes [not null]
-  account_id Bytes [not null]
-  parent_id Bytes
-  body String [not null]
-}
-
-Table Chat {
-  id Bytes [pk]
-  sender_id Bytes [not null]
-  receiver_id Bytes [not null]
-  message String [not null]
-  create_at DateTime [default: `now()`, not null]
-}
-
-Table Address {
-  id Bytes [pk]
-  customer_id Bytes [not null]
-  city String [not null]
-  district String [not null]
-  ward String
-  street String [not null]
+Table Resident {
+  resident_id Int [pk]
+  avatar_url String [not null]
+  name String [not null]
   phone String [not null]
+
+  indexes {
+    (resident_id) [pk]
+  }
 }
 
-Table Cart {
-  id Bytes [pk]
-  customer_id Bytes [not null]
-  laptop_id Bytes [not null]
-  quantity Int [not null]
+Table Employee {
+  employee_id Int [pk]
+  avatar_url String [not null]
+  name String [not null]
+  phone String [not null]
+
+  indexes {
+    (employee_id) [pk]
+  }
 }
 
-Enum Role {
-  Customer
-  Admin
+Table Account {
+  id Int [pk, increment]
+  email String [unique, not null]
+  password String [not null]
 }
 
-Enum Color {
-  Red
-  Blue
-  Green
-  Black
-  White
-  Silver
-  Gold
+Table Monthly_Pass {
+  resident_id Int [pk]
+
+  indexes {
+    (resident_id) [pk]
+  }
 }
 
-Enum PaymentType {
-  VNPay
-  Momo
-  ZaloPay
-  CashOnDelivery
+Table Monthly_Pass_Detail {
+  id Int [pk, increment]
+  monthly_pass_id Int [unique, not null]
+  start_day DateTime [not null]
+  end_day DateTime [not null]
+  total_cost Decimal [not null]
+  payment_status String [not null]
 }
 
-Enum PaymentStatus {
-  Pending
-  Success
-  Failed
+Table Trip_Cost {
+  id Int [pk, increment]
+  exit_time DateTime [not null]
+  total_cost Decimal [not null]
 }
 
-Enum OrderStatus {
-  Pending
-  Shipped
-  Delivered
-  Cancelled
+Table Movement_Data {
+  id Int [pk, increment]
+  license_plate String [not null]
+  apartment_id Int [not null]
 }
 
-Enum LaptopStatus {
-  Available
-  SoldOut
-  Maintenance
+Table Employee_Movement_Data {
+  employee_id Int [not null]
+  movement_data_id Int [not null]
+  record_time DateTime [not null]
+
+  indexes {
+    (employee_id, movement_data_id) [pk]
+  }
 }
 
-Ref: Customer.account_id - Account.id
+Table Movement_Data_Trip {
+  id Int [pk, increment]
+  movement_data_id Int [not null]
+  entry_time DateTime [not null]
+  exit_time DateTime [not null]
+  total_cost Decimal [not null]
+}
 
-Ref: Admin.account_id - Account.id
+Table Movement_Data_Monthly {
+  movement_data_id Int [not null]
+  monthly_pass_id Int [not null]
+  entry_time DateTime [not null]
+  exit_time DateTime [not null]
 
-Ref: LaptopModelOnSale.laptop_model_id > LaptopModel.id
+  indexes {
+    (movement_data_id, monthly_pass_id) [pk]
+  }
+}
 
-Ref: LaptopModelOnSale.sale_id > Sale.id
+Ref: Apartment_Resident.apartment_id > Apartment.id
 
-Ref: Laptop.model_id > LaptopModel.id
+Ref: Apartment_Resident.resident_id > Resident.resident_id
 
-Ref: Order.customer_id > Customer.account_id
+Ref: Resident.resident_id - Account.id
 
-Ref: OrderDetail.order_id > Order.id
+Ref: Employee.employee_id > Account.id
 
-Ref: OrderDetail.laptop_model_id > LaptopModel.id
+Ref: Monthly_Pass.resident_id > Resident.resident_id
 
-Ref: Payment.order_id - Order.id
+Ref: Monthly_Pass_Detail.monthly_pass_id > Monthly_Pass.resident_id
 
-Ref: Payment.customer_id > Customer.account_id
+Ref: Movement_Data.apartment_id > Apartment.id
 
-Ref: Payment.payment_method_id > PaymentMethod.id
+Ref: Employee_Movement_Data.employee_id > Employee.employee_id
 
-Ref: LaptopModelOnImage.laptop_model_id > LaptopModel.id
+Ref: Employee_Movement_Data.movement_data_id > Movement_Data.id
 
-Ref: LaptopModelOnImage.image_id > Image.id
+Ref: Movement_Data_Trip.movement_data_id > Movement_Data.id
 
-Ref: Comment.laptop_model_id > LaptopModel.id
+Ref: Movement_Data_Monthly.movement_data_id > Movement_Data.id
 
-Ref: Comment.account_id > Account.id
-
-Ref: Comment.parent_id - Comment.id
-
-Ref: Chat.sender_id > Account.id
-
-Ref: Chat.receiver_id > Account.id
-
-Ref: Address.customer_id > Customer.account_id
-
-Ref: Cart.customer_id > Customer.account_id
-
-Ref: Cart.laptop_id > Laptop.mac_id
+Ref: Movement_Data_Monthly.monthly_pass_id > Monthly_Pass.resident_id

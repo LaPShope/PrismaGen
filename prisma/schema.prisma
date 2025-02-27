@@ -8,9 +8,8 @@ generator client {
 }
 
 generator dbml {
-  provider = "prisma-dbml-generator"
+  provider              = "prisma-dbml-generator"
   includeRelationFields = false
-  
 }
 
 datasource db {
@@ -34,7 +33,11 @@ model Account {
 }
 
 model Customer {
-  account_id Bytes @id
+  account_id Bytes    @id
+  gender     String
+  born_date  DateTime
+  phone      String
+  avatar     String?
 
   Account Account   @relation(fields: [account_id], references: [id])
   Payment Payment[]
@@ -60,11 +63,12 @@ model LaptopModel {
   price       Decimal @db.Decimal(10, 2)
   description String?
 
-  Comment            Comment[]
-  Laptop             Laptop[]
-  LaptopModelOnImage LaptopModelOnImage[]
-  OrderDetail        OrderDetail[]
-  LaptopModelOnSale  LaptopModelOnSale[]
+  Comment           Comment[]
+  Laptop            Laptop[]
+  LaptopOnImage     LaptopOnImage[]
+  OrderDetail       OrderDetail[]
+  LaptopOnSale      LaptopOnSale[]
+  LaptopModelOnCart LaptopOnCart[]
 
   @@index([cpu])
   @@index([ram])
@@ -74,7 +78,7 @@ model LaptopModel {
   @@index([cpu, ram, brand, price])
 }
 
-model LaptopModelOnSale {
+model LaptopOnSale {
   laptop_model_id Bytes
   sale_id         Bytes
 
@@ -91,7 +95,7 @@ model Sale {
   end_at            DateTime
   discount          Float
 
-  LaptopModelOnSale LaptopModelOnSale[]
+  LaptopModelOnSale LaptopOnSale[]
 }
 
 model Laptop {
@@ -101,7 +105,6 @@ model Laptop {
   status   LaptopStatus @default(Available)
 
   LaptopModel LaptopModel @relation(fields: [model_id], references: [id])
-  Cart        Cart[]
 
   @@index([status])
   @@index([model_id])
@@ -165,7 +168,7 @@ model PaymentMethod {
   @@index([type])
 }
 
-model LaptopModelOnImage {
+model LaptopOnImage {
   laptop_model_id Bytes
   image_id        Bytes
 
@@ -179,7 +182,7 @@ model Image {
   id        Bytes  @id @default(dbgenerated("uuid_generate_v4()"))
   image_url String
 
-  LaptopModelOnImage LaptopModelOnImage[]
+  LaptopModelOnImage LaptopOnImage[]
 }
 
 model Comment {
@@ -227,14 +230,23 @@ model Address {
 model Cart {
   id          Bytes @id @default(dbgenerated("uuid_generate_v4()"))
   customer_id Bytes
-  laptop_id   Bytes
   quantity    Int
 
-  Customer Customer @relation(fields: [customer_id], references: [account_id])
-  Laptop   Laptop   @relation(fields: [laptop_id], references: [mac_id])
+  Customer          Customer       @relation(fields: [customer_id], references: [account_id])
+  LaptopModelOnCart LaptopOnCart[]
 
   @@index([customer_id])
-  @@index([laptop_id])
+}
+
+model LaptopOnCart {
+  cart_id         Bytes
+  laptop_model_id Bytes
+  quantity        Int
+
+  Cart        Cart        @relation(fields: [cart_id], references: [id])
+  LaptopModel LaptopModel @relation(fields: [laptop_model_id], references: [id])
+
+  @@id([cart_id, laptop_model_id])
 }
 
 enum Role {

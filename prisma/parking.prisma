@@ -1,0 +1,142 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator dbml {
+  provider              = "prisma-dbml-generator"
+  includeRelationFields = false
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Apartment {
+  id      Int    @id @default(autoincrement())
+  name    String
+  address String
+
+  residents     Apartment_Resident[]
+  Movement_Data Movement_Data[]
+}
+
+model Apartment_Resident {
+  apartment_id Int
+  resident_id  Int
+
+  Apartment Apartment @relation(fields: [apartment_id], references: [id])
+  Resident  Resident  @relation(fields: [resident_id], references: [resident_id])
+
+  @@id([apartment_id, resident_id])
+}
+
+model Resident {
+  resident_id Int
+  avatar_url  String
+  name        String
+  phone       String
+
+  Apartments   Apartment_Resident[]
+  Account      Account              @relation(fields: [resident_id], references: [id])
+  Monthly_Pass Monthly_Pass[]
+
+  @@id([resident_id])
+}
+
+model Employee {
+  employee_id            Int
+  avatar_url             String
+  name                   String
+  phone                  String
+  Employee_Movement_Data Employee_Movement_Data[]
+  Account                Account                  @relation(fields: [employee_id], references: [id])
+
+  @@id([employee_id])
+}
+
+model Account {
+  id       Int    @id @default(autoincrement())
+  email    String @unique
+  password String
+
+  Resident Resident?
+  Employee Employee[]
+}
+
+model Monthly_Pass {
+  resident_id Int
+  Resident    Resident @relation(fields: [resident_id], references: [resident_id])
+
+  Monthly_Pass_Detail   Monthly_Pass_Detail[]
+  Movement_Data_Monthly Movement_Data_Monthly[]
+
+  @@id([resident_id])
+}
+
+model Monthly_Pass_Detail {
+  id              Int      @id @default(autoincrement())
+  monthly_pass_id Int      @unique
+  start_day       DateTime
+  end_day         DateTime
+  total_cost      Decimal  @db.Decimal(10, 2)
+  payment_status  String
+
+  Monthly_Pass Monthly_Pass @relation(fields: [monthly_pass_id], references: [resident_id])
+}
+
+model Trip_Cost {
+  id         Int      @id @default(autoincrement())
+  exit_time  DateTime
+  total_cost Decimal  @db.Decimal(10, 2)
+}
+
+model Movement_Data {
+  id            Int    @id @default(autoincrement())
+  license_plate String
+  apartment_id  Int
+
+  Movement_Data_Trips    Movement_Data_Trip[]
+  Movement_Data_Monthly  Movement_Data_Monthly[]
+  Apartment              Apartment                @relation(fields: [apartment_id], references: [id])
+  Employee_Movement_Data Employee_Movement_Data[]
+}
+
+model Employee_Movement_Data {
+  employee_id      Int
+  movement_data_id Int
+
+  record_time   DateTime
+  Employee      Employee      @relation(fields: [employee_id], references: [employee_id])
+  Movement_Data Movement_Data @relation(fields: [movement_data_id], references: [id])
+
+  @@id([employee_id, movement_data_id])
+}
+
+model Movement_Data_Trip {
+  id               Int @id @default(autoincrement())
+  movement_data_id Int
+
+  entry_time DateTime
+  exit_time  DateTime
+  total_cost Decimal  @db.Decimal(10, 2)
+
+  Movement_Data Movement_Data @relation(fields: [movement_data_id], references: [id])
+}
+
+model Movement_Data_Monthly {
+  movement_data_id Int
+  monthly_pass_id  Int
+  entry_time       DateTime
+  exit_time        DateTime
+
+  Movement_Data Movement_Data @relation(fields: [movement_data_id], references: [id])
+  Monthly_Pass  Monthly_Pass  @relation(fields: [monthly_pass_id], references: [resident_id])
+
+  @@id([movement_data_id, monthly_pass_id])
+}
