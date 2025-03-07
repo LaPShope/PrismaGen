@@ -18,7 +18,7 @@ datasource db {
 }
 
 model Account {
-  id       Bytes   @id @default(dbgenerated("uuid_generate_v4()"))
+  id       Bytes   @id @db.Binary(16)
   email    String  @unique
   name     String?
   password String
@@ -33,11 +33,12 @@ model Account {
 }
 
 model Customer {
-  account_id Bytes    @id
-  gender     String
-  born_date  DateTime
-  phone      String
-  avatar     String?
+  account_id Bytes @id @db.Binary(16)
+
+  gender    String
+  born_date DateTime
+  phone     String
+  avatar    String?
 
   Account Account   @relation(fields: [account_id], references: [id])
   Payment Payment[]
@@ -47,12 +48,14 @@ model Customer {
 }
 
 model Admin {
-  account_id Bytes   @id
-  Account    Account @relation(fields: [account_id], references: [id])
+  account_id Bytes @id @db.Binary(16)
+
+  Account Account @relation(fields: [account_id], references: [id])
 }
 
 model LaptopModel {
-  id          Bytes   @id @default(dbgenerated("uuid_generate_v4()"))
+  id Bytes @id @db.Binary(16)
+
   name        String
   brand       String
   cpu         String
@@ -79,8 +82,9 @@ model LaptopModel {
 }
 
 model LaptopOnSale {
-  laptop_model_id Bytes
-  sale_id         Bytes
+  laptop_model_id Bytes @db.Binary(16)
+
+  sale_id Bytes @db.Binary(16)
 
   LaptopModel LaptopModel @relation(fields: [laptop_model_id], references: [id])
   Sale        Sale        @relation(fields: [sale_id], references: [id])
@@ -89,7 +93,8 @@ model LaptopOnSale {
 }
 
 model Sale {
-  id                Bytes    @id @default(dbgenerated("uuid_generate_v4()"))
+  id Bytes @id @db.Binary(16)
+
   event_description String?
   start_at          DateTime
   end_at            DateTime
@@ -99,10 +104,12 @@ model Sale {
 }
 
 model Laptop {
-  mac_id   Bytes        @id
+  mac_id Bytes @id @db.Binary(16)
+
   MFG      DateTime
-  model_id Bytes
-  status   LaptopStatus @default(Available)
+  model_id Bytes    @db.Binary(16)
+
+  status LaptopStatus @default(Available)
 
   LaptopModel LaptopModel @relation(fields: [model_id], references: [id])
 
@@ -111,8 +118,10 @@ model Laptop {
 }
 
 model Order {
-  id          Bytes       @id @default(dbgenerated("uuid_generate_v4()"))
-  customer_id Bytes
+  id Bytes @id @db.Binary(16)
+
+  customer_id Bytes @db.Binary(16)
+
   status      OrderStatus @default(Pending)
   address     String
   date_create DateTime    @default(now())
@@ -126,9 +135,9 @@ model Order {
 }
 
 model OrderDetail {
-  id              Bytes   @id @default(dbgenerated("uuid_generate_v4()")) //(id, orderId, laptopId)
-  order_id        Bytes
-  laptop_model_id Bytes
+  id              Bytes   @id @db.Binary(16)
+  order_id        Bytes   @db.Binary(16)
+  laptop_model_id Bytes   @db.Binary(16)
   quantity        Int
   price           Decimal @db.Decimal(10, 2)
 
@@ -140,12 +149,15 @@ model OrderDetail {
 }
 
 model Payment {
-  id                Bytes         @id
-  customer_id       Bytes
-  order_id          Bytes         @unique
+  id Bytes @id @db.Binary(16)
+
+  customer_id Bytes @db.Binary(16)
+
+  order_id Bytes @unique @db.Binary(16)
+
   type              PaymentType
   status            PaymentStatus
-  payment_method_id Bytes?
+  payment_method_id Bytes?        @db.Binary(16)
 
   Order         Order          @relation(fields: [order_id], references: [id])
   Customer      Customer       @relation(fields: [customer_id], references: [account_id])
@@ -159,7 +171,8 @@ model Payment {
 }
 
 model PaymentMethod {
-  id   Bytes       @id @default(dbgenerated("uuid_generate_v4()"))
+  id Bytes @id @db.Binary(16)
+
   data Json
   type PaymentType
 
@@ -169,8 +182,9 @@ model PaymentMethod {
 }
 
 model LaptopOnImage {
-  laptop_model_id Bytes
-  image_id        Bytes
+  laptop_model_id Bytes @db.Binary(16)
+
+  image_id Bytes @db.Binary(16)
 
   LaptopModel LaptopModel @relation(fields: [laptop_model_id], references: [id])
   Image       Image       @relation(fields: [image_id], references: [id])
@@ -179,18 +193,23 @@ model LaptopOnImage {
 }
 
 model Image {
-  id        Bytes  @id @default(dbgenerated("uuid_generate_v4()"))
+  id Bytes @id @db.Binary(16)
+
   image_url String
 
   LaptopModelOnImage LaptopOnImage[]
 }
 
 model Comment {
-  id              Bytes  @id @default(dbgenerated("uuid_generate_v4()"))
-  laptop_model_id Bytes
-  account_id      Bytes
-  parent_id       Bytes?
-  body            String
+  id Bytes @id @db.Binary(16)
+
+  laptop_model_id Bytes @db.Binary(16)
+
+  account_id Bytes @db.Binary(16)
+
+  parent_id Bytes? @db.Binary(16)
+
+  body String
 
   LaptopModel LaptopModel @relation(fields: [laptop_model_id], references: [id])
   Account     Account     @relation(fields: [account_id], references: [id])
@@ -203,24 +222,29 @@ model Comment {
 }
 
 model Chat {
-  id          Bytes    @id @default(dbgenerated("uuid_generate_v4()"))
-  sender_id   Bytes
-  receiver_id Bytes
-  message     String
-  create_at   DateTime @default(now())
+  id Bytes @id @db.Binary(16)
+
+  sender_id Bytes @db.Binary(16)
+
+  receiver_id Bytes @db.Binary(16)
+
+  message   String
+  create_at DateTime @default(now())
 
   Sender   Account @relation("Sender", fields: [sender_id], references: [id])
   Receiver Account @relation("Receiver", fields: [receiver_id], references: [id])
 }
 
 model Address {
-  id          Bytes   @id @default(dbgenerated("uuid_generate_v4()"))
-  customer_id Bytes
-  city        String
-  district    String
-  ward        String?
-  street      String
-  phone       String
+  id Bytes @id @db.Binary(16)
+
+  customer_id Bytes @db.Binary(16)
+
+  city     String
+  district String
+  ward     String?
+  street   String
+  phone    String
 
   Customer Customer @relation(fields: [customer_id], references: [account_id])
 
@@ -228,9 +252,11 @@ model Address {
 }
 
 model Cart {
-  id          Bytes @id @default(dbgenerated("uuid_generate_v4()"))
-  customer_id Bytes
-  quantity    Int
+  id Bytes @id @db.Binary(16)
+
+  customer_id Bytes @db.Binary(16)
+
+  quantity Int
 
   Customer          Customer       @relation(fields: [customer_id], references: [account_id])
   LaptopModelOnCart LaptopOnCart[]
@@ -239,9 +265,11 @@ model Cart {
 }
 
 model LaptopOnCart {
-  cart_id         Bytes
-  laptop_model_id Bytes
-  quantity        Int
+  cart_id Bytes @db.Binary(16)
+
+  laptop_model_id Bytes @db.Binary(16)
+
+  quantity Int
 
   Cart        Cart        @relation(fields: [cart_id], references: [id])
   LaptopModel LaptopModel @relation(fields: [laptop_model_id], references: [id])

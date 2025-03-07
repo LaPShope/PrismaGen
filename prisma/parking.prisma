@@ -70,11 +70,13 @@ model Account {
 }
 
 model Monthly_Pass {
-  resident_id Int
-  Resident    Resident @relation(fields: [resident_id], references: [resident_id])
+  resident_id     Int
+  vehicle_type_id String
 
+  Resident              Resident                @relation(fields: [resident_id], references: [resident_id])
   Monthly_Pass_Detail   Monthly_Pass_Detail[]
   Movement_Data_Monthly Movement_Data_Monthly[]
+  Vehicle_Type          Vehicle_Type            @relation(fields: [vehicle_type_id], references: [name])
 
   @@id([resident_id])
 }
@@ -91,9 +93,20 @@ model Monthly_Pass_Detail {
 }
 
 model Trip_Cost {
-  id         Int      @id @default(autoincrement())
-  exit_time  DateTime
-  total_cost Decimal  @db.Decimal(10, 2)
+  id              Int      @id @default(autoincrement())
+  vehicle_type_id String
+  exit_time       DateTime
+  total_cost      Decimal  @db.Decimal(10, 2)
+
+  Vehicle_Type Vehicle_Type @relation(fields: [vehicle_type_id], references: [name])
+}
+
+model Monthly_Cost {
+  id              Int     @id @default(autoincrement())
+  vehicle_type_id String
+  cost            Decimal @db.Decimal(10, 2)
+
+  Vehicle_Type Vehicle_Type @relation(fields: [vehicle_type_id], references: [name])
 }
 
 model Movement_Data {
@@ -139,4 +152,11 @@ model Movement_Data_Monthly {
   Monthly_Pass  Monthly_Pass  @relation(fields: [monthly_pass_id], references: [resident_id])
 
   @@id([movement_data_id, monthly_pass_id])
+}
+
+model Vehicle_Type {
+  name         String         @id
+  Trip_Cost    Trip_Cost[]
+  Monthly_Cost Monthly_Cost[]
+  Monthly_Pass Monthly_Pass[]
 }

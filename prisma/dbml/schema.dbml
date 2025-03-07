@@ -46,10 +46,12 @@ Table Account {
 }
 
 Table Monthly_Pass {
-  resident_id Int [pk]
+  id Int [pk, increment]
+  resident_id Int [not null]
+  vehicle_type_id String [not null]
 
   indexes {
-    (resident_id) [pk]
+    (resident_id, vehicle_type_id) [unique]
   }
 }
 
@@ -64,8 +66,16 @@ Table Monthly_Pass_Detail {
 
 Table Trip_Cost {
   id Int [pk, increment]
+  vehicle_type_id String [not null]
   exit_time DateTime [not null]
   total_cost Decimal [not null]
+}
+
+Table Monthly_Cost {
+  id Int [pk, increment]
+  vehicle_type_id String [not null]
+  cost Decimal [not null]
+  start_time DateTime [not null]
 }
 
 Table Movement_Data {
@@ -103,6 +113,10 @@ Table Movement_Data_Monthly {
   }
 }
 
+Table Vehicle_Type {
+  name String [pk]
+}
+
 Ref: Apartment_Resident.apartment_id > Apartment.id
 
 Ref: Apartment_Resident.resident_id > Resident.resident_id
@@ -113,7 +127,13 @@ Ref: Employee.employee_id > Account.id
 
 Ref: Monthly_Pass.resident_id > Resident.resident_id
 
-Ref: Monthly_Pass_Detail.monthly_pass_id > Monthly_Pass.resident_id
+Ref: Monthly_Pass.vehicle_type_id > Vehicle_Type.name
+
+Ref: Monthly_Pass_Detail.monthly_pass_id > Monthly_Pass.id
+
+Ref: Trip_Cost.vehicle_type_id > Vehicle_Type.name
+
+Ref: Monthly_Cost.vehicle_type_id > Vehicle_Type.name
 
 Ref: Movement_Data.apartment_id > Apartment.id
 
@@ -125,4 +145,4 @@ Ref: Movement_Data_Trip.movement_data_id > Movement_Data.id
 
 Ref: Movement_Data_Monthly.movement_data_id > Movement_Data.id
 
-Ref: Movement_Data_Monthly.monthly_pass_id > Monthly_Pass.resident_id
+Ref: Movement_Data_Monthly.monthly_pass_id > Monthly_Pass.id
