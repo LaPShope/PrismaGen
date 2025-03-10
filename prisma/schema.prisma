@@ -22,7 +22,7 @@ model Account {
   email    String  @unique
   name     String?
   password String
-  role     Role    @default(Customer)
+  role     Role
 
   Customer Customer?
   Admin    Admin?
@@ -35,7 +35,7 @@ model Account {
 model Customer {
   account_id Bytes @id @db.Binary(16)
 
-  gender    String
+  gender    Gender
   born_date DateTime
   phone     String
   avatar    String?
@@ -277,11 +277,6 @@ model LaptopOnCart {
   @@id([cart_id, laptop_model_id])
 }
 
-enum Role {
-  Customer
-  Admin
-}
-
 enum Color {
   Red
   Blue
@@ -316,4 +311,15 @@ enum LaptopStatus {
   Available
   SoldOut
   Maintenance
+}
+
+enum Gender {
+  Male
+  Female
+  Other
+}
+
+enum Role {
+  Customer
+  Admin
 }

@@ -4,10 +4,17 @@ CREATE TABLE `Account` (
     `email` VARCHAR(191) NOT NULL,
     `name` VARCHAR(191) NULL,
     `password` VARCHAR(191) NOT NULL,
-    `role` ENUM('Customer', 'Admin') NOT NULL DEFAULT 'Customer',
+    `role` VARCHAR(191) NOT NULL,
 
     UNIQUE INDEX `Account_email_key`(`email`),
     PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `Role` (
+    `name` VARCHAR(191) NOT NULL DEFAULT 'customer',
+
+    PRIMARY KEY (`name`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
@@ -208,6 +215,9 @@ CREATE TABLE `LaptopOnCart` (
 
     PRIMARY KEY (`cart_id`, `laptop_model_id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- AddForeignKey
+ALTER TABLE `Account` ADD CONSTRAINT `Account_role_fkey` FOREIGN KEY (`role`) REFERENCES `Role`(`name`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `Customer` ADD CONSTRAINT `Customer_account_id_fkey` FOREIGN KEY (`account_id`) REFERENCES `Account`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;

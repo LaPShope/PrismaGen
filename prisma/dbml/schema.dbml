@@ -7,12 +7,12 @@ Table Account {
   email String [unique, not null]
   name String
   password String [not null]
-  role Role [not null, default: 'Customer']
+  role Role [not null]
 }
 
 Table Customer {
   account_id Bytes [pk]
-  gender String [not null]
+  gender Gender [not null]
   born_date DateTime [not null]
   phone String [not null]
   avatar String
@@ -146,11 +146,6 @@ Table LaptopOnCart {
   }
 }
 
-Enum Role {
-  Customer
-  Admin
-}
-
 Enum Color {
   Red
   Blue
@@ -185,6 +180,17 @@ Enum LaptopStatus {
   Available
   SoldOut
   Maintenance
+}
+
+Enum Gender {
+  Male
+  Female
+  Other
+}
+
+Enum Role {
+  Customer
+  Admin
 }
 
 Ref: Customer.account_id - Account.id
