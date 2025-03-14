@@ -125,6 +125,9 @@ model Order {
   status      OrderStatus @default(Pending)
   address     String
   date_create DateTime    @default(now())
+  delivery_cost Decimal @db.Decimal(10, 2)
+  final_price Decimal @db.Decimal(10, 2)
+  
 
   OrderDetail OrderDetail[]
   Payment     Payment?
@@ -150,11 +153,8 @@ model OrderDetail {
 
 model Payment {
   id Bytes @id @db.Binary(16)
-
   customer_id Bytes @db.Binary(16)
-
   order_id Bytes @unique @db.Binary(16)
-
   type              PaymentType
   status            PaymentStatus
   payment_method_id Bytes?        @db.Binary(16)
@@ -253,10 +253,7 @@ model Address {
 
 model Cart {
   id Bytes @id @db.Binary(16)
-
   customer_id Bytes @db.Binary(16)
-
-  quantity Int
 
   Customer          Customer       @relation(fields: [customer_id], references: [account_id])
   LaptopModelOnCart LaptopOnCart[]
