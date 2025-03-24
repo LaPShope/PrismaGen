@@ -30,6 +30,9 @@ model Account {
 
   Sender   Chat[] @relation("Sender")
   Receiver Chat[] @relation("Receiver")
+
+
+  @@map("account")
 }
 
 model Customer {
@@ -45,12 +48,17 @@ model Customer {
   Order   Order[]
   Address Address[]
   Cart    Cart[]
+
+
+  @@map("customer")
 }
 
 model Admin {
   account_id Bytes @id @db.Binary(16)
 
   Account Account @relation(fields: [account_id], references: [id])
+
+  @@map("admin")
 }
 
 model LaptopModel {
@@ -80,6 +88,9 @@ model LaptopModel {
   @@index([cpu, ram])
   @@index([cpu, ram, brand])
   @@index([cpu, ram, brand, price])
+
+
+  @@map("laptop_model")
 }
 
 model LaptopOnSale {
@@ -91,6 +102,7 @@ model LaptopOnSale {
   Sale        Sale        @relation(fields: [sale_id], references: [id])
 
   @@id([laptop_model_id, sale_id])
+  @@map("laptop_on_sale")
 }
 
 model Sale {
@@ -102,6 +114,8 @@ model Sale {
   discount          Float
 
   LaptopModelOnSale LaptopOnSale[]
+
+  @@map("sale")
 }
 
 model Laptop {
@@ -116,6 +130,9 @@ model Laptop {
 
   @@index([status])
   @@index([model_id])
+
+
+  @@map("laptop")
 }
 
 model Order {
@@ -135,6 +152,8 @@ model Order {
 
   @@index([customer_id])
   @@index([status])
+
+  @@map("order")
 }
 
 model OrderDetail {
@@ -149,6 +168,9 @@ model OrderDetail {
 
   @@index([order_id])
   @@index([laptop_model_id])
+
+
+  @@map("order_detail")
 }
 
 model Payment {
@@ -168,6 +190,9 @@ model Payment {
   @@index([status])
   @@index([type])
   @@index([payment_method_id])
+
+
+  @@map("payment")
 }
 
 model PaymentMethod {
@@ -179,6 +204,8 @@ model PaymentMethod {
   Payment Payment[]
 
   @@index([type])
+
+  @@map("payment_method")
 }
 
 model LaptopOnImage {
@@ -190,6 +217,8 @@ model LaptopOnImage {
   Image       Image       @relation(fields: [image_id], references: [id])
 
   @@id([laptop_model_id, image_id])
+
+  @@map("laptop_on_image")
 }
 
 model Image {
@@ -198,6 +227,8 @@ model Image {
   image_url String
 
   LaptopModelOnImage LaptopOnImage[]
+
+  @@map("image")
 }
 
 model Comment {
@@ -219,6 +250,9 @@ model Comment {
   @@index([laptop_model_id])
   @@index([account_id])
   @@index([parent_id])
+
+
+  @@map("comment")
 }
 
 model Chat {
@@ -233,6 +267,9 @@ model Chat {
 
   Sender   Account @relation("Sender", fields: [sender_id], references: [id])
   Receiver Account @relation("Receiver", fields: [receiver_id], references: [id])
+
+
+  @@map("chat")
 }
 
 model Address {
@@ -249,6 +286,8 @@ model Address {
   Customer Customer @relation(fields: [customer_id], references: [account_id])
 
   @@index([customer_id])
+
+  @@map("address")
 }
 
 model Cart {
@@ -259,6 +298,9 @@ model Cart {
   LaptopModelOnCart LaptopOnCart[]
 
   @@index([customer_id])
+
+
+  @@map("cart")
 }
 
 model LaptopOnCart {
@@ -272,6 +314,9 @@ model LaptopOnCart {
   LaptopModel LaptopModel @relation(fields: [laptop_model_id], references: [id])
 
   @@id([cart_id, laptop_model_id])
+
+
+  @@map("laptop_on_cart")
 }
 
 enum Color {
