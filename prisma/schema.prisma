@@ -38,9 +38,9 @@ model Account {
 model Customer {
   account_id Bytes @id @db.Binary(16)
 
-  gender    Gender
-  born_date DateTime
-  phone     String
+  gender    Gender?
+  born_date DateTime?
+  phone     String?
   avatar    String?
 
   Account Account   @relation(fields: [account_id], references: [id])

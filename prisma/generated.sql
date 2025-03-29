@@ -13,9 +13,9 @@ CREATE TABLE `account` (
 -- CreateTable
 CREATE TABLE `customer` (
     `account_id` BINARY(16) NOT NULL,
-    `gender` ENUM('Male', 'Female', 'Other') NOT NULL,
-    `born_date` DATETIME(3) NOT NULL,
-    `phone` VARCHAR(191) NOT NULL,
+    `gender` ENUM('Male', 'Female', 'Other') NULL,
+    `born_date` DATETIME(3) NULL,
+    `phone` VARCHAR(191) NULL,
     `avatar` VARCHAR(191) NULL,
 
     PRIMARY KEY (`account_id`)

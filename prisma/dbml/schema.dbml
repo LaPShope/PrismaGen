@@ -2,7 +2,7 @@
 //// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 //// ------------------------------------------------------
 
-Table Account {
+Table account {
   id Bytes [pk]
   email String [unique, not null]
   name String
@@ -10,7 +10,7 @@ Table Account {
   role Role [not null]
 }
 
-Table Customer {
+Table customer {
   account_id Bytes [pk]
   gender Gender [not null]
   born_date DateTime [not null]
@@ -18,16 +18,17 @@ Table Customer {
   avatar String
 }
 
-Table Admin {
+Table admin {
   account_id Bytes [pk]
 }
 
-Table LaptopModel {
+Table laptop_model {
   id Bytes [pk]
   name String [not null]
   brand String [not null]
   cpu String [not null]
   ram String [not null]
+  gpu String [not null]
   storage String [not null]
   display String [not null]
   color Color [not null]
@@ -35,7 +36,7 @@ Table LaptopModel {
   description String
 }
 
-Table LaptopOnSale {
+Table laptop_on_sale {
   laptop_model_id Bytes [not null]
   sale_id Bytes [not null]
 
@@ -44,7 +45,7 @@ Table LaptopOnSale {
   }
 }
 
-Table Sale {
+Table sale {
   id Bytes [pk]
   event_description String
   start_at DateTime [not null]
@@ -52,22 +53,24 @@ Table Sale {
   discount Float [not null]
 }
 
-Table Laptop {
+Table laptop {
   mac_id Bytes [pk]
   MFG DateTime [not null]
   model_id Bytes [not null]
   status LaptopStatus [not null, default: 'Available']
 }
 
-Table Order {
+Table order {
   id Bytes [pk]
   customer_id Bytes [not null]
   status OrderStatus [not null, default: 'Pending']
   address String [not null]
   date_create DateTime [default: `now()`, not null]
+  delivery_cost Decimal [not null]
+  final_price Decimal [not null]
 }
 
-Table OrderDetail {
+Table order_detail {
   id Bytes [pk]
   order_id Bytes [not null]
   laptop_model_id Bytes [not null]
@@ -75,7 +78,7 @@ Table OrderDetail {
   price Decimal [not null]
 }
 
-Table Payment {
+Table payment {
   id Bytes [pk]
   customer_id Bytes [not null]
   order_id Bytes [unique, not null]
@@ -84,13 +87,13 @@ Table Payment {
   payment_method_id Bytes
 }
 
-Table PaymentMethod {
+Table payment_method {
   id Bytes [pk]
   data Json [not null]
   type PaymentType [not null]
 }
 
-Table LaptopOnImage {
+Table laptop_on_image {
   laptop_model_id Bytes [not null]
   image_id Bytes [not null]
 
@@ -99,12 +102,12 @@ Table LaptopOnImage {
   }
 }
 
-Table Image {
+Table image {
   id Bytes [pk]
   image_url String [not null]
 }
 
-Table Comment {
+Table comment {
   id Bytes [pk]
   laptop_model_id Bytes [not null]
   account_id Bytes [not null]
@@ -112,7 +115,7 @@ Table Comment {
   body String [not null]
 }
 
-Table Chat {
+Table chat {
   id Bytes [pk]
   sender_id Bytes [not null]
   receiver_id Bytes [not null]
@@ -120,7 +123,7 @@ Table Chat {
   create_at DateTime [default: `now()`, not null]
 }
 
-Table Address {
+Table address {
   id Bytes [pk]
   customer_id Bytes [not null]
   city String [not null]
@@ -130,13 +133,12 @@ Table Address {
   phone String [not null]
 }
 
-Table Cart {
+Table cart {
   id Bytes [pk]
   customer_id Bytes [not null]
-  quantity Int [not null]
 }
 
-Table LaptopOnCart {
+Table laptop_on_cart {
   cart_id Bytes [not null]
   laptop_model_id Bytes [not null]
   quantity Int [not null]
@@ -193,46 +195,46 @@ Enum Role {
   Admin
 }
 
-Ref: Customer.account_id - Account.id
+Ref: customer.account_id - account.id
 
-Ref: Admin.account_id - Account.id
+Ref: admin.account_id - account.id
 
-Ref: LaptopOnSale.laptop_model_id > LaptopModel.id
+Ref: laptop_on_sale.laptop_model_id > laptop_model.id
 
-Ref: LaptopOnSale.sale_id > Sale.id
+Ref: laptop_on_sale.sale_id > sale.id
 
-Ref: Laptop.model_id > LaptopModel.id
+Ref: laptop.model_id > laptop_model.id
 
-Ref: Order.customer_id > Customer.account_id
+Ref: order.customer_id > customer.account_id
 
-Ref: OrderDetail.order_id > Order.id
+Ref: order_detail.order_id > order.id
 
-Ref: OrderDetail.laptop_model_id > LaptopModel.id
+Ref: order_detail.laptop_model_id > laptop_model.id
 
-Ref: Payment.order_id - Order.id
+Ref: payment.order_id - order.id
 
-Ref: Payment.customer_id > Customer.account_id
+Ref: payment.customer_id > customer.account_id
 
-Ref: Payment.payment_method_id > PaymentMethod.id
+Ref: payment.payment_method_id > payment_method.id
 
-Ref: LaptopOnImage.laptop_model_id > LaptopModel.id
+Ref: laptop_on_image.laptop_model_id > laptop_model.id
 
-Ref: LaptopOnImage.image_id > Image.id
+Ref: laptop_on_image.image_id > image.id
 
-Ref: Comment.laptop_model_id > LaptopModel.id
+Ref: comment.laptop_model_id > laptop_model.id
 
-Ref: Comment.account_id > Account.id
+Ref: comment.account_id > account.id
 
-Ref: Comment.parent_id - Comment.id
+Ref: comment.parent_id - comment.id
 
-Ref: Chat.sender_id > Account.id
+Ref: chat.sender_id > account.id
 
-Ref: Chat.receiver_id > Account.id
+Ref: chat.receiver_id > account.id
 
-Ref: Address.customer_id > Customer.account_id
+Ref: address.customer_id > customer.account_id
 
-Ref: Cart.customer_id > Customer.account_id
+Ref: cart.customer_id > customer.account_id
 
-Ref: LaptopOnCart.cart_id > Cart.id
+Ref: laptop_on_cart.cart_id > cart.id
 
-Ref: LaptopOnCart.laptop_model_id > LaptopModel.id
+Ref: laptop_on_cart.laptop_model_id > laptop_model.id
