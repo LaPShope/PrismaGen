@@ -1,9 +1,9 @@
 -- CreateTable
 CREATE TABLE `account` (
     `id` BINARY(16) NOT NULL,
-    `email` VARCHAR(191) NOT NULL,
-    `name` VARCHAR(191) NULL,
-    `password` VARCHAR(191) NOT NULL,
+    `email` VARCHAR(255) NOT NULL,
+    `name` VARCHAR(255) NULL,
+    `password` VARCHAR(255) NOT NULL,
     `role` ENUM('Customer', 'Admin') NOT NULL,
 
     UNIQUE INDEX `account_email_key`(`email`),
@@ -15,8 +15,8 @@ CREATE TABLE `customer` (
     `account_id` BINARY(16) NOT NULL,
     `gender` ENUM('Male', 'Female', 'Other') NULL,
     `born_date` DATETIME(3) NULL,
-    `phone` VARCHAR(191) NULL,
-    `avatar` VARCHAR(191) NULL,
+    `phone` VARCHAR(255) NULL,
+    `avatar` VARCHAR(255) NULL,
 
     PRIMARY KEY (`account_id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -31,16 +31,16 @@ CREATE TABLE `admin` (
 -- CreateTable
 CREATE TABLE `laptop_model` (
     `id` BINARY(16) NOT NULL,
-    `name` VARCHAR(191) NOT NULL,
-    `brand` VARCHAR(191) NOT NULL,
-    `cpu` VARCHAR(191) NOT NULL,
-    `ram` VARCHAR(191) NOT NULL,
-    `gpu` VARCHAR(191) NOT NULL,
-    `storage` VARCHAR(191) NOT NULL,
-    `display` VARCHAR(191) NOT NULL,
+    `name` VARCHAR(255) NOT NULL,
+    `brand` VARCHAR(255) NOT NULL,
+    `cpu` VARCHAR(255) NOT NULL,
+    `ram` VARCHAR(255) NOT NULL,
+    `gpu` VARCHAR(255) NOT NULL,
+    `storage` VARCHAR(255) NOT NULL,
+    `display` VARCHAR(255) NOT NULL,
     `color` ENUM('Red', 'Blue', 'Green', 'Black', 'White', 'Silver', 'Gold') NOT NULL,
     `price` DECIMAL(10, 2) NOT NULL,
-    `description` VARCHAR(191) NULL,
+    `description` VARCHAR(255) NULL,
 
     INDEX `laptop_model_cpu_idx`(`cpu`),
     INDEX `laptop_model_ram_idx`(`ram`),
@@ -62,7 +62,7 @@ CREATE TABLE `laptop_on_sale` (
 -- CreateTable
 CREATE TABLE `sale` (
     `id` BINARY(16) NOT NULL,
-    `event_description` VARCHAR(191) NULL,
+    `event_description` VARCHAR(255) NULL,
     `start_at` DATETIME(3) NOT NULL,
     `end_at` DATETIME(3) NOT NULL,
     `discount` DOUBLE NOT NULL,
@@ -87,7 +87,7 @@ CREATE TABLE `order` (
     `id` BINARY(16) NOT NULL,
     `customer_id` BINARY(16) NOT NULL,
     `status` ENUM('Pending', 'Shipped', 'Delivered', 'Cancelled') NOT NULL DEFAULT 'Pending',
-    `address` VARCHAR(191) NOT NULL,
+    `address` VARCHAR(255) NOT NULL,
     `date_create` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `delivery_cost` DECIMAL(10, 2) NOT NULL,
     `final_price` DECIMAL(10, 2) NOT NULL,
@@ -149,7 +149,7 @@ CREATE TABLE `laptop_on_image` (
 -- CreateTable
 CREATE TABLE `image` (
     `id` BINARY(16) NOT NULL,
-    `image_url` VARCHAR(191) NOT NULL,
+    `image_url` VARCHAR(255) NOT NULL,
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -160,7 +160,7 @@ CREATE TABLE `comment` (
     `laptop_model_id` BINARY(16) NOT NULL,
     `account_id` BINARY(16) NOT NULL,
     `parent_id` BINARY(16) NULL,
-    `body` VARCHAR(191) NOT NULL,
+    `body` VARCHAR(255) NOT NULL,
 
     INDEX `comment_laptop_model_id_idx`(`laptop_model_id`),
     INDEX `comment_account_id_idx`(`account_id`),
@@ -173,7 +173,7 @@ CREATE TABLE `chat` (
     `id` BINARY(16) NOT NULL,
     `sender_id` BINARY(16) NOT NULL,
     `receiver_id` BINARY(16) NOT NULL,
-    `message` VARCHAR(191) NOT NULL,
+    `message` VARCHAR(255) NOT NULL,
     `create_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
     PRIMARY KEY (`id`)
@@ -183,11 +183,11 @@ CREATE TABLE `chat` (
 CREATE TABLE `address` (
     `id` BINARY(16) NOT NULL,
     `customer_id` BINARY(16) NOT NULL,
-    `city` VARCHAR(191) NOT NULL,
-    `district` VARCHAR(191) NOT NULL,
-    `ward` VARCHAR(191) NULL,
-    `street` VARCHAR(191) NOT NULL,
-    `phone` VARCHAR(191) NOT NULL,
+    `city` VARCHAR(255) NOT NULL,
+    `district` VARCHAR(255) NOT NULL,
+    `ward` VARCHAR(255) NULL,
+    `street` VARCHAR(255) NOT NULL,
+    `phone` VARCHAR(255) NOT NULL,
 
     INDEX `address_customer_id_idx`(`customer_id`),
     PRIMARY KEY (`id`)
